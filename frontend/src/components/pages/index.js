@@ -1,0 +1,5 @@
+export {AIAssistantPage} from './AIAssistantPage'
+export {ConsultationUploadPage} from './ConsultationUploadPage'
+export {LoginPage} from './LoginPage'
+export {ReportDetailsPage} from './ReportDetailsPage'
+export {DashboardPage} from './DashboardPage'

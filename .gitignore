@@ -12,4 +12,46 @@ data
 .env
 
 src/temp
-src/tests
+tests
+
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Vite
+.vite
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+DELIVERABLES.md 
+DEVELOPER_GUIDE.md 
+FILE_STRUCTURE_GUIDE.md
+ROUTES.md
+TAILWIND_V4_README.md
+QUICK_START.md
+
