@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../../App.jsx';
 import {Link} from 'react-router-dom';
 
-export function Navbar({ onMenuToggle }) {
+export const Navbar = ({ onMenuToggle }) => {
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const routes = {

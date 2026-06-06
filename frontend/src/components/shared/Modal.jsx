@@ -1,6 +1,6 @@
 import { Card } from './Card';
 
-export function Modal({ isOpen, onClose, title, children, actions }) {
+export const Modal = ({ isOpen, onClose, title, children, actions }) => {
   if (!isOpen) return null;
 
   return (

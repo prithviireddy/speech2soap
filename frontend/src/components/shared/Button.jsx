@@ -1,10 +1,10 @@
-export function Button({ 
+export const Button = ({ 
   variant = 'primary', 
   size = 'md', 
   className = '', 
   children,
   ...props 
-}) {
+}) => {
   const baseStyles = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 cursor-pointer font-display';
   
   const variants = {

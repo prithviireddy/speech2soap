@@ -2,7 +2,7 @@ import { useAuth } from '../../App.jsx';
 import { DashboardLayout } from '../layouts';
 import { Card, Badge, Button } from '../shared';
 
-export function DashboardPage() {
+export const DashboardPage = () => {
   const { user } = useAuth();
 
   const stats = [
@@ -25,7 +25,7 @@ export function DashboardPage() {
       <div className="space-y-8">
         {/* Welcome Section */}
         <div className="space-y-4">
-          <h1 className="text-4xl font-display font-bold">Welcome back, {user?.name || 'Patient'}</h1>
+          <h1 className="pt-6 text-4xl font-display font-bold">Welcome back, {user?.name || 'Patient'}</h1>
           <p className="text-text-secondary text-lg">Last consultation: December 15, 2024 with Dr. Sarah Chen</p>
         </div>
 

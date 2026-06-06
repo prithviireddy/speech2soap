@@ -1,17 +1,17 @@
 import { Badge } from '../shared';
 import { Link } from "react-router-dom";
 
-export function Sidebar({ isOpen, onClose }) {
+export const Sidebar = ({ isOpen, onClose }) => {
   const navItems = [
-    { icon: '🏠', label: 'Dashboard', id: 'dashboard' },
-    { icon: '➕', label: 'New Upload', id: 'upload' },
-    { icon: '📄', label: 'Reports', id: 'reports' },
-    { icon: '📁', label: 'My Records', id: 'records' },
-    { icon: '👤', label: 'Profile', id: 'profile' },
-    { icon: '💊', label: 'Medications', id: 'medications' },
-    { icon: '✓', label: 'Follow-ups', id: 'followups', badge: 3 },
-    { icon: '✨', label: 'AI Assistant', id: 'assistant' },
-    { icon: '⚙️', label: 'Settings', id: 'settings' }
+    { icon: '🏠', label: 'Dashboard', id: 'dashboard', link: '/dashboard' },
+    { icon: '➕', label: 'New Upload', id: 'upload', link: '/upload' },
+    { icon: '📄', label: 'Reports', id: 'reports', link: '/report' },
+    { icon: '📁', label: 'My Records', id: 'records', link: '/#' },
+    { icon: '👤', label: 'Profile', id: 'profile', link:'/#' },
+    { icon: '💊', label: 'Medications', id: 'medications', link:'/#' },
+    { icon: '✓', label: 'Follow-ups', id: 'followups', badge: 3, link:'/#' },
+    { icon: '✨', label: 'AI Assistant', id: 'assistant', link:'/assistant' },
+    { icon: '⚙️', label: 'Settings', id: 'settings', link:'/settings' }
   ];
 
   return (
@@ -30,17 +30,20 @@ export function Sidebar({ isOpen, onClose }) {
       }`}>
         <nav className="p-4 space-y-1">
           {navItems.map((item) => (
-            <button
+            <Link
               key={item.id}
-              onClick={onClose}
+              to = {item.link}
+              onClick={()=>{
+                onClose();
+              }}
               className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-bg-base transition-colors group text-text-primary hover:text-brand-primary text-sm"
-            >
+             >
               <span className="text-lg">{item.icon}</span>
               <span className="font-medium flex-1 text-left">{item.label}</span>
               {item.badge && (
                 <Badge size="sm" variant="danger">{item.badge}</Badge>
               )}
-            </button>
+            </Link>
           ))}
         </nav>
       </aside>

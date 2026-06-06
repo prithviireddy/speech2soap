@@ -85,10 +85,10 @@ export function ReportDetailsPage() {
         {/* Left Column - Report */}
         <div className="lg:col-span-2 space-y-8">
           <Card>
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
               <div>
                 <h1 className="text-3xl font-display font-bold mb-2">Consultation Report</h1>
-                <div className="flex gap-4 text-sm text-text-secondary">
+                <div className="flex flex-wrap gap-4 text-sm text-text-secondary">
                   <span>📅 December 15, 2024</span>
                   <span>👨‍⚕️ Dr. Sarah Chen</span>
                   <Badge variant="success" size="sm">Reviewed</Badge>

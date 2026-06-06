@@ -1,4 +1,4 @@
-export function Badge({ variant = 'primary', size = 'md', children }) {
+export const Badge = ({ variant = 'primary', size = 'md', children }) => {
   const variants = {
     primary: 'bg-brand-primary text-white',
     success: 'bg-success text-white',

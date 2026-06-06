@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { DashboardLayout } from '../layouts';
 import { Card, Button } from '../shared';
 
-export function AIAssistantPage() {
+export const AIAssistantPage = () => {
   const [messages, setMessages] = useState([
     {
       type: 'assistant',

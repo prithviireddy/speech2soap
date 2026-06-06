@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import './index.css';
+import { LoginPage, DashboardPage, ConsultationUploadPage, ReportDetailsPage, AIAssistantPage } from './components/pages';
 
 // Auth Context
 export const AuthContext = createContext();
@@ -13,29 +14,11 @@ export const useAuth = () => {
   return context;
 };
 
-// Loading Spinner Component (utility)
-export function LoadingSpinner({ size = 'md', className = '' }) {
-  const sizes = {
-    sm: 'w-4 h-4',
-    md: 'w-8 h-8',
-    lg: 'w-12 h-12'
-  };
 
-  return (
-    <div className={`${sizes[size]} ${className}`}>
-      <div className="animate-spin rounded-full h-full w-full border-3 border-border-default border-t-brand-primary"></div>
-    </div>
-  );
-}
 
-// Pages
-import { LoginPage } from './components/pages';
-import { DashboardPage } from './components/pages';
-import { ConsultationUploadPage } from './components/pages';
-import { ReportDetailsPage } from './components/pages';
-import { AIAssistantPage } from './components/pages';
 
-export default function App() {
+
+const App = () => {
   const [authState, setAuthState] = useState({
     isAuthenticated: false,
     user: null
@@ -64,7 +47,7 @@ export default function App() {
 
   return (
     <AuthContext.Provider value={authValue}>
-      <Router>
+      <BrowserRouter>
         <Routes>
           {/* Public Routes */}
           <Route
@@ -96,7 +79,9 @@ export default function App() {
             element={<Navigate to={authState.isAuthenticated ? '/dashboard' : '/login'} />} 
           />
         </Routes>
-      </Router>
+      </BrowserRouter>
     </AuthContext.Provider>
-  );
+  )
 }
+
+export default App

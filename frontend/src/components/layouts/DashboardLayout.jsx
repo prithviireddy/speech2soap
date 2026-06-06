@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
 
-export function DashboardLayout({ children }) {
+export const DashboardLayout = ({ children }) => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (

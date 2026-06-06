@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../layouts';
-import { Card, Button } from '../shared';
-import { LoadingSpinner } from '../../App.jsx';
+import { Card, Button,LoadingSpinner } from '../shared';
 
-export function ConsultationUploadPage() {
+export const ConsultationUploadPage = () => {
   const [step, setStep] = useState('upload'); // upload, details, progress, success
   const [file, setFile] = useState(null);
   const [progress, setProgress] = useState(0);

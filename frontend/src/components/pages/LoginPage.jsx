@@ -3,7 +3,7 @@ import { useAuth } from '../../App.jsx';
 import { AuthLayout } from '../layouts';
 import { Button, Card } from '../shared';
 
-export function LoginPage() {
+export const LoginPage = () => {
   const { login } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
 
@@ -53,5 +53,5 @@ export function LoginPage() {
         <Button size="lg" variant="outline">Create Account</Button>
       </Card>
     </AuthLayout>
-  );
+  )
 }

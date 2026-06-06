@@ -1,4 +1,4 @@
-export function Tabs({ tabs, activeTab, onTabChange }) {
+export const Tabs = ({ tabs, activeTab, onTabChange }) => {
   return (
     <div>
       <div className="flex border-b border-border-default mb-6">
