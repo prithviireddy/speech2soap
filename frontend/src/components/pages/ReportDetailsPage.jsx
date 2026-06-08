@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { DashboardLayout } from '../layouts';
 import { Card, Badge, Button, Tabs } from '../shared';
-
+import { Calendar, UserPlus,Share,BookText,FileText } from 'lucide-react';
 export function ReportDetailsPage() {
   const [activeTab, setActiveTab] = useState('summary');
 
@@ -89,8 +89,8 @@ export function ReportDetailsPage() {
               <div>
                 <h1 className="text-3xl font-display font-bold mb-2">Consultation Report</h1>
                 <div className="flex flex-wrap gap-4 text-sm text-text-secondary">
-                  <span>📅 December 15, 2024</span>
-                  <span>👨‍⚕️ Dr. Sarah Chen</span>
+                  <span><Calendar /> December 15, 2024</span>
+                  <span><UserPlus /> Dr. Sarah Chen</span>
                   <Badge variant="success" size="sm">Reviewed</Badge>
                 </div>
               </div>
@@ -154,9 +154,9 @@ export function ReportDetailsPage() {
 
           {/* Export Options */}
           <Card className="space-y-3">
-            <Button variant="secondary" className="w-full justify-center">📄 Export PDF</Button>
-            <Button variant="secondary" className="w-full justify-center">📝 Export DOCX</Button>
-            <Button variant="secondary" className="w-full justify-center">🔗 Share Report</Button>
+            <Button variant="secondary" className="w-full flex items-center justify-center gap-2"><FileText />  Export PDF</Button>
+            <Button variant="secondary" className="w-full flex items-center justify-center gap-2"><BookText />  Export DOCX</Button>
+            <Button variant="secondary" className="w-full flex items-center justify-center gap-2"><Share />  Share Report</Button>
           </Card>
         </div>
       </div>

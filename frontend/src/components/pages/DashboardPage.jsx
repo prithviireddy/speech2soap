@@ -1,15 +1,15 @@
 import { useAuth } from '../../App.jsx';
 import { DashboardLayout } from '../layouts';
 import { Card, Badge, Button } from '../shared';
-
+import { NotepadText,Pill,ClipboardClock ,Brain,Plus,Bot } from 'lucide-react';
 export const DashboardPage = () => {
   const { user } = useAuth();
 
   const stats = [
-    { label: 'Consultations', value: '12', icon: '📋' },
-    { label: 'Medications', value: '5', icon: '💊' },
-    { label: 'Pending Follow-ups', value: '3', icon: '⏰' },
-    { label: 'Recent Insights', value: '8', icon: '💡' }
+    { label: 'Consultations', value: '12', icon: <NotepadText /> },
+    { label: 'Medications', value: '5', icon: <Pill /> },
+    { label: 'Pending Follow-ups', value: '3', icon: <ClipboardClock /> },
+    { label: 'Recent Insights', value: '8', icon:   <Brain /> }
   ];
 
   const consultations = [
@@ -152,11 +152,14 @@ export const DashboardPage = () => {
 
             {/* Quick Actions */}
             <div className="space-y-3">
-              <Button variant="primary" className="w-full">
-                📤 Upload New Consultation
+              <Button variant="primary" className="w-full flex items-center justify-center gap-2">
+                <Plus />
+                Upload New Consultation
               </Button>
-              <Button variant="secondary" className="w-full">
-                ✨ AI Assistant
+
+              <Button variant="secondary" className="w-full flex items-center justify-center gap-2">
+                <Bot />
+                AI Assistant
               </Button>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../layouts';
 import { Card, Button,LoadingSpinner } from '../shared';
+import { Mic } from 'lucide-react';
 
 export const ConsultationUploadPage = () => {
   const [step, setStep] = useState('upload'); // upload, details, progress, success
@@ -41,7 +42,10 @@ export const ConsultationUploadPage = () => {
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleFileDrop}
           >
-            <div className="text-6xl mb-4">🎙️</div>
+
+            <div className='flex justify-center mb-6'>
+              <Mic size={60} strokeWidth={3} absoluteStrokeWidth />
+            </div>
             <h2 className="text-2xl font-display font-bold mb-2">Drop your audio file here</h2>
             <p className="text-text-secondary mb-6">Supports MP3, WAV, M4A, AAC (Max 500MB)</p>
             <Button variant="primary">Browse Files</Button>

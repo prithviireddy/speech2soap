@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { DashboardLayout } from '../layouts';
 import { Card, Button } from '../shared';
+import { SendHorizontal } from 'lucide-react';
+
 
 export const AIAssistantPage = () => {
   const [messages, setMessages] = useState([
@@ -65,7 +67,7 @@ export const AIAssistantPage = () => {
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                   className="flex-1 px-3 py-2 border border-border-default rounded-lg focus:outline-none focus:border-brand-primary"
                 />
-                <Button variant="primary" onClick={handleSendMessage}>📤</Button>
+                <Button variant="primary" onClick={handleSendMessage}><SendHorizontal /></Button>
               </div>
 
               <div>

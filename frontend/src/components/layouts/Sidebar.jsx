@@ -1,17 +1,19 @@
 import { Badge } from '../shared';
 import { Link } from "react-router-dom";
+import { LayoutDashboard,NotepadText,Plus,FolderOpen,Pill,UserRoundPen,CheckCheck,Bot,Settings  } from 'lucide-react';
 
 export const Sidebar = ({ isOpen, onClose }) => {
   const navItems = [
-    { icon: '🏠', label: 'Dashboard', id: 'dashboard', link: '/dashboard' },
-    { icon: '➕', label: 'New Upload', id: 'upload', link: '/upload' },
-    { icon: '📄', label: 'Reports', id: 'reports', link: '/report' },
-    { icon: '📁', label: 'My Records', id: 'records', link: '/#' },
-    { icon: '👤', label: 'Profile', id: 'profile', link:'/#' },
-    { icon: '💊', label: 'Medications', id: 'medications', link:'/#' },
-    { icon: '✓', label: 'Follow-ups', id: 'followups', badge: 3, link:'/#' },
-    { icon: '✨', label: 'AI Assistant', id: 'assistant', link:'/assistant' },
-    { icon: '⚙️', label: 'Settings', id: 'settings', link:'/settings' }
+    { icon: <LayoutDashboard />, label: 'Dashboard', id: 'dashboard', link: '/dashboard' },
+    { icon: <Plus />
+, label: 'New Upload', id: 'upload', link: '/upload' },
+    { icon:  <NotepadText />, label: 'Reports', id: 'reports', link: '/report' },
+    { icon: <FolderOpen />, label: 'My Records', id: 'records', link: '/#' },
+    { icon: <UserRoundPen />, label: 'Profile', id: 'profile', link:'/#' },
+    { icon: <Pill />, label: 'Medications', id: 'medications', link:'/#' },
+    { icon: <CheckCheck />, label: 'Follow-ups', id: 'followups', badge: 3, link:'/#' },
+    { icon: <Bot />, label: 'AI Assistant', id: 'assistant', link:'/assistant' },
+    { icon: <Settings />, label: 'Settings', id: 'settings', link:'/settings' }
   ];
 
   return (
