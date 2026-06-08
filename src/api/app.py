@@ -1,15 +1,24 @@
 import shutil
 import json
-
+import uvicorn
 from pathlib import Path
 from fastapi import FastAPI, UploadFile, File
 
 from transcription.speaker_diarization import transcribe_audio
 from processing.merge_dialogue import merge_dialogue
-from clinical.generate_report import generate_clinical_report
+from clinicalReport.generate_report import generate_clinical_report
+
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -23,7 +32,7 @@ def root():
     return {"message": "Clinical AI API running"}
 
 
-@app.post("/analyze")
+@app.post("/upload")
 async def analyze_audio(file: UploadFile = File(...)):
 
     # Save uploaded audio
@@ -44,3 +53,6 @@ async def analyze_audio(file: UploadFile = File(...)):
         report = json.load(f)
 
     return report
+
+if __name__ == "__main__":
+    uvicorn.run(app,host="0.0.0.0",port = 8000)

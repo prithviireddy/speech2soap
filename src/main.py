@@ -2,7 +2,7 @@ from pathlib import Path
 
 from transcription.speaker_diarization import transcribe_audio
 from processing.merge_dialogue import merge_dialogue
-from clinical.generate_report import generate_clinical_report
+from clinicalReport.generate_report import generate_clinical_report
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent

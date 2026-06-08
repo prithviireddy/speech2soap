@@ -2,11 +2,18 @@ import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../layouts';
 import { Card, Button,LoadingSpinner } from '../shared';
 import { Mic } from 'lucide-react';
+import {uploadAudio} from '../../api/upload'
+import { useNavigate } from "react-router-dom";
+
+
+
 
 export const ConsultationUploadPage = () => {
+  const navigate = useNavigate();
   const [step, setStep] = useState('upload'); // upload, details, progress, success
   const [file, setFile] = useState(null);
   const [progress, setProgress] = useState(0);
+  const [report, setReport] = useState(null)
 
   const handleFileDrop = (e) => {
     e.preventDefault();
@@ -17,19 +24,29 @@ export const ConsultationUploadPage = () => {
     }
   };
 
-  const handleUploadStart = () => {
+  const handleUploadStart = async () => {
+  if (!file) return;
+
+  try {
     setStep('progress');
-    let currentProgress = 0;
-    const interval = setInterval(() => {
-      currentProgress += Math.random() * 30;
-      if (currentProgress > 100) currentProgress = 100;
-      setProgress(currentProgress);
-      if (currentProgress >= 100) {
-        clearInterval(interval);
-        setTimeout(() => setStep('success'), 500);
-      }
-    }, 500);
-  };
+
+    const reportData = await uploadAudio(file);
+
+    console.log(reportData);
+
+    setReport(reportData);
+    navigate("/report", {
+      state: {
+        report: reportData,
+      },
+    });
+    setProgress(100);
+    setStep('success');
+
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   return (
     <DashboardLayout>
@@ -48,7 +65,27 @@ export const ConsultationUploadPage = () => {
             </div>
             <h2 className="text-2xl font-display font-bold mb-2">Drop your audio file here</h2>
             <p className="text-text-secondary mb-6">Supports MP3, WAV, M4A, AAC (Max 500MB)</p>
-            <Button variant="primary">Browse Files</Button>
+            <input
+              id="audio-upload"
+              type="file"
+              className='hidden'
+              accept=".mp3,.wav,.m4a,.aac,.mpeg"
+              onChange={(e) => {
+                const selectedFile = e.target.files[0];
+
+                if (selectedFile) {
+                  setFile(selectedFile);
+                  setStep('details');
+                }
+              }}
+            />
+
+            <label
+              htmlFor="audio-upload"
+              className="inline-block px-4 py-2 bg-blue-600 text-white rounded cursor-pointer"
+            >
+              Browse Files
+            </label> 
           </Card>
         )}
 
@@ -138,7 +175,18 @@ export const ConsultationUploadPage = () => {
               <p className="text-text-secondary">Your report is ready for review</p>
             </div>
             <div className="flex gap-3">
-              <Button variant="secondary" className="flex-1">Upload Another</Button>
+              <Button
+                  variant="secondary"
+                  className="flex-1"
+                  onClick={() => {
+                    setFile(null);
+                    setReport(null);
+                    setProgress(0);
+                    setStep('upload');
+                  }}
+                >
+                  Upload Another
+                </Button>
               <Button variant="primary" className="flex-1">View Report</Button>
             </div>
           </Card>

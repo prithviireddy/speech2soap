@@ -22,12 +22,7 @@ OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 SYSTEM_PROMPT = """
 You are an advanced clinical NLP system.
 
-Your task:
-Analyze the doctor-patient conversation and generate:
-
-1. SOAP sections
-2. Clinical entities
-3. Clinical summary
+Analyze the doctor-patient conversation and generate structured clinical documentation.
 
 Return STRICT VALID JSON ONLY.
 
@@ -40,26 +35,58 @@ Required JSON format:
     "assessment": [],
     "plan": []
   },
+
+  "clinical_report": {
+    "diagnosis": [
+      {
+        "name": "",
+        "icd_code": ""
+      }
+    ],
+
+    "treatment_plan": [],
+
+    "medications": [
+      {
+        "name": "",
+        "dosage": "",
+        "frequency": "",
+        "duration": ""
+      }
+    ],
+
+    "follow_up_tasks": [],
+
+    "allergies": [],
+
+    "key_findings": []
+  },
+
   "entities": {
     "symptoms": [],
-    "medications": [],
     "diagnosis": [],
+    "medications": [],
     "duration": []
   },
+
   "summary": ""
 }
 
 Rules:
+
 - Return ONLY valid JSON
 - No markdown
 - No explanations
 - No extra text
-- Keep SOAP utterances concise
-- Avoid duplicates in entities
-- summary must be short and clinical
-- If information is missing, return empty arrays
+- Keep SOAP entries concise
+- Avoid duplicates
+- Summary must be short and clinical
+- If information is not mentioned:
+  - arrays must be []
+  - strings must be ""
+- Do not invent diagnoses, medications, ICD codes, allergies, or follow-up tasks
+- Extract only explicitly stated or strongly implied clinical information
 """
-
 
 # Optional text cleanup
 def clean_text(text):
