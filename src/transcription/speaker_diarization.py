@@ -23,9 +23,12 @@ torch.backends.cuda.matmul.allow_tf32 = False
 torch.backends.cudnn.allow_tf32 = False
 
 
-def transcribe_audio(audio_path: Path) -> Path:
+def transcribe_audio(audio_path: Path, job_id: str, jobs: dict) -> Path:
     
     print(f"Transcribing: {audio_path.name}")
+
+    jobs[job_id]["progress"] = 15
+    jobs[job_id]["stage"] = "Loading Whisper Model"
 
     # Load model
     model = whisperx.load_model(
@@ -34,8 +37,14 @@ def transcribe_audio(audio_path: Path) -> Path:
         compute_type="float16"
     )
 
+    jobs[job_id]["progress"] = 20
+    jobs[job_id]["stage"] = "Loading Audio"
+
     # Load audio
     audio = whisperx.load_audio(str(audio_path))
+
+    jobs[job_id]["progress"] = 30
+    jobs[job_id]["stage"] = "Transcribing Speech"
 
     # Transcribe
     result = model.transcribe(
@@ -43,11 +52,17 @@ def transcribe_audio(audio_path: Path) -> Path:
         batch_size = 8, 
         language = "en"
     )
+    jobs[job_id]["progress"] = 45
+    jobs[job_id]["stage"] = "Loading Alignment Model"
+
     # Alignment
     model_a, metadata = whisperx.load_align_model(
         language_code=result["language"],
         device=device
     )
+
+    jobs[job_id]["progress"] = 55
+    jobs[job_id]["stage"] = "Aligning Words"
 
     result = whisperx.align(result["segments"], model_a, metadata, audio, device)
 
@@ -55,13 +70,22 @@ def transcribe_audio(audio_path: Path) -> Path:
     del model
     torch.cuda.empty_cache()
 
+    jobs[job_id]["progress"] = 65
+    jobs[job_id]["stage"] = "Loading Speaker Diarization"
+
     # Diarization
     diarize_model = DiarizationPipeline(
         token = os.getenv("HF_TOKEN"), 
         device=device
     )
 
+    jobs[job_id]["progress"] = 75
+    jobs[job_id]["stage"] = "Identifying Speakers"
+
     diarize_segments = diarize_model(audio, min_speakers=2, max_speakers=2)
+
+    jobs[job_id]["progress"] = 82
+    jobs[job_id]["stage"] = "Assigning Speakers"
 
     # Assign speakers
     result = whisperx.assign_word_speakers(diarize_segments, result)
@@ -87,6 +111,8 @@ def transcribe_audio(audio_path: Path) -> Path:
         clean_segments.append({"speaker": segment.get("speaker", "UNKNOWN"), "text": text})
 
     output_path = OUTPUT_DIR/f"{audio_path.stem}.json"
+    jobs[job_id]["progress"] = 88
+    jobs[job_id]["stage"] = "Saving Transcript"
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(clean_segments, f, indent=2,  ensure_ascii=False)
 

@@ -2,17 +2,20 @@ import { useState, useEffect } from 'react';
 import { DashboardLayout } from '../layouts';
 import { Card, Button,LoadingSpinner } from '../shared';
 import { Mic } from 'lucide-react';
-import {uploadAudio} from '../../api/upload'
+import {uploadAudio, getJobStatus} from '../../api/upload'
 import { useNavigate } from "react-router-dom";
+import { CheckCheck,Check  } from 'lucide-react';
+
 
 
 
 
 export const ConsultationUploadPage = () => {
   const navigate = useNavigate()
-  const [step, setStep] = useState('upload') // upload, details, progress,       success
+  const [step, setStep] = useState('upload') // upload, details, progress
   const [file, setFile] = useState(null)
   const [progress, setProgress] = useState(0)
+  const [currentStage, setCurrentStage] = useState("");
   const [report, setReport] = useState(null)
   const [isDragging, setIsDragging] = useState(false);
 
@@ -31,28 +34,53 @@ export const ConsultationUploadPage = () => {
   };
 
   const handleUploadStart = async () => {
+
   if (!file) return;
 
   try {
+
     setStep('progress');
 
-    const reportData = await uploadAudio(file);
+    const uploadResponse = await uploadAudio(file);
 
-    console.log(reportData);
+    const jobId = uploadResponse.job_id;
 
-    setReport(reportData);
-    navigate("/report", {
-      state: {
-        report: reportData,
-      },
-    });
-    setProgress(100);
-    // setStep('success');
+    const interval = setInterval(async () => {
+      
+      console.log(jobId);
+
+      const status = await getJobStatus(jobId);
+
+      setProgress(status.progress);
+      setCurrentStage(status.stage);
+
+      if (status.status === "completed") {
+
+        clearInterval(interval);
+
+        navigate("/report", {
+          state: {
+            report: status.report
+          }
+        });
+      }
+
+      if (status.status === "failed") {
+
+        clearInterval(interval);
+
+        console.error(status.error);
+      }
+
+    }, 1000);
 
   } catch (error) {
+
     console.error(error);
+
   }
 };
+
 
   return (
     <DashboardLayout>
@@ -124,7 +152,7 @@ export const ConsultationUploadPage = () => {
                 inline-flex items-center px-5 py-2.5
                 bg-brand-primary text-white
                 rounded-lg cursor-pointer
-                hover:opacity-90 transition
+                hover:opacity-80 transition
               "
             >
               Browse Files
@@ -151,7 +179,7 @@ export const ConsultationUploadPage = () => {
                   <p className="font-medium">{file?.name}</p>
                   <p className="text-sm text-text-secondary">{(file?.size / 1024 / 1024).toFixed(2)} MB</p>
                 </div>
-                <span className="text-2xl">✓</span>
+                <span className="text-2xl"><CheckCheck  /></span>
               </div>
             </div>
 
@@ -189,29 +217,99 @@ export const ConsultationUploadPage = () => {
             <div>
               <div className="flex justify-between mb-2">
                 <p className="font-medium">Processing your consultation...</p>
-                <p className="text-brand-primary font-bold">{Math.round(progress)}%</p>
+                <p className="text-brand-primary font-bold">
+                  {Math.round(progress)}%
+                </p>
               </div>
+
               <div className="w-full h-2 bg-border-default rounded-full overflow-hidden">
                 <div
                   className="h-full bg-gradient-to-r from-brand-primary to-medical transition-all duration-300"
                   style={{ width: `${progress}%` }}
-                ></div>
+                />
               </div>
+
+              <p className="text-sm text-brand-primary mt-3 font-medium">
+                {currentStage}
+              </p>
             </div>
 
             <div className="space-y-3">
               {[
-                { stage: 'Audio Upload', status: 'complete' },
-                { stage: 'Transcription', status: progress > 20 ? 'complete' : 'pending' },
-                { stage: 'Speaker Diarization', status: progress > 40 ? 'complete' : 'pending' },
-                { stage: 'SOAP Generation', status: progress > 60 ? 'complete' : 'pending' },
-                { stage: 'Clinical Summary', status: progress > 80 ? 'in-progress' : 'pending' }
+                {
+                  stage: "Audio Upload",
+                  status:
+                    progress >= 15
+                      ? "complete"
+                      : progress > 0
+                      ? "in-progress"
+                      : "pending",
+                },
+
+                {
+                  stage: "Speech Transcription",
+                  status:
+                    progress >= 65
+                      ? "complete"
+                      : progress >= 15
+                      ? "in-progress"
+                      : "pending",
+                },
+
+                {
+                  stage: "Speaker Diarization",
+                  status:
+                    progress >= 88
+                      ? "complete"
+                      : progress >= 65
+                      ? "in-progress"
+                      : "pending",
+                },
+
+                {
+                  stage: "Transcript Processing",
+                  status:
+                    progress >= 95
+                      ? "complete"
+                      : progress >= 88
+                      ? "in-progress"
+                      : "pending",
+                },
+
+                {
+                  stage: "Clinical Report Generation",
+                  status:
+                    progress >= 100
+                      ? "complete"
+                      : progress >= 95
+                      ? "in-progress"
+                      : "pending",
+                },
               ].map((item, idx) => (
                 <div key={idx} className="flex items-center gap-3 p-3">
-                  {item.status === 'complete' && <span className="text-2xl">✓</span>}
-                  {item.status === 'in-progress' && <LoadingSpinner size="sm" />}
-                  {item.status === 'pending' && <span className="w-6 h-6 rounded-full border-2 border-border-default"></span>}
-                  <p className={item.status === 'complete' ? 'text-text-primary font-medium text-sm' : 'text-text-secondary text-sm'}>
+                  {item.status === "complete" && (
+                    <span className="text-2xl">
+                      <Check />
+                    </span>
+                  )}
+
+                  {item.status === "in-progress" && (
+                    <LoadingSpinner size="sm" />
+                  )}
+
+                  {item.status === "pending" && (
+                    <span className="w-6 h-6 rounded-full border-2 border-border-default" />
+                  )}
+
+                  <p
+                    className={
+                      item.status === "complete"
+                        ? "text-text-primary font-medium text-sm"
+                        : item.status === "in-progress"
+                        ? "text-brand-primary font-medium text-sm"
+                        : "text-text-secondary text-sm"
+                    }
+                  >
                     {item.stage}
                   </p>
                 </div>
@@ -220,30 +318,7 @@ export const ConsultationUploadPage = () => {
           </Card>
         )}
 
-        {step === 'success' && (
-          <Card className="text-center space-y-6">
-            <div className="text-6xl">✨</div>
-            <div>
-              <h2 className="text-2xl font-display font-bold mb-2">Consultation Uploaded!</h2>
-              <p className="text-text-secondary">Your report is ready for review</p>
-            </div>
-            <div className="flex gap-3">
-              <Button
-                  variant="secondary"
-                  className="flex-1"
-                  onClick={() => {
-                    setFile(null);
-                    setReport(null);
-                    setProgress(0);
-                    setStep('upload');
-                  }}
-                >
-                  Upload Another
-                </Button>
-              <Button variant="primary" className="flex-1">View Report</Button>
-            </div>
-          </Card>
-        )}
+  
       </div>
     </DashboardLayout>
   );

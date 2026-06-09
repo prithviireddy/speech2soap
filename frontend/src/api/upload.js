@@ -1,20 +1,29 @@
+import api from "./api";
 
-export async function uploadAudio(audioFile) {
-  const formData = new FormData();
+export const uploadAudio = async (file) => {
 
-  formData.append("file", audioFile);
+    const formData = new FormData();
 
-  const response = await fetch(
-    "http://localhost:8000/upload",
-    {
-      method: "POST",
-      body: formData,
-    }
-  );
+    formData.append("file", file);
 
-  if (!response.ok) {
-    throw new Error("Upload failed");
-  }
+    const response = await api.post(
+        "/upload",
+        formData,
+        {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        }
+    );
 
-  return response.json();
-}
+    return response.data;
+};
+
+export const getJobStatus = async (jobId) => {
+
+    const response = await api.get(
+        `/status/${jobId}`
+    );
+
+    return response.data;
+};
