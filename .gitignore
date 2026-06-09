@@ -12,6 +12,7 @@ data
 .env
 
 src/temp
+src/ui
 tests
 
 
