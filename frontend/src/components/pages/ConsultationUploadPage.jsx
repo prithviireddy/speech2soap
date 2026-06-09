@@ -9,14 +9,20 @@ import { useNavigate } from "react-router-dom";
 
 
 export const ConsultationUploadPage = () => {
-  const navigate = useNavigate();
-  const [step, setStep] = useState('upload'); // upload, details, progress, success
-  const [file, setFile] = useState(null);
-  const [progress, setProgress] = useState(0);
+  const navigate = useNavigate()
+  const [step, setStep] = useState('upload') // upload, details, progress,       success
+  const [file, setFile] = useState(null)
+  const [progress, setProgress] = useState(0)
   const [report, setReport] = useState(null)
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleFileDrop = (e) => {
     e.preventDefault();
+
+    // console.log("types:", e.dataTransfer.types);
+    // console.log("files:", e.dataTransfer.files);
+    // console.log("items:", e.dataTransfer.items);
+
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
       setFile(droppedFile);
@@ -41,7 +47,7 @@ export const ConsultationUploadPage = () => {
       },
     });
     setProgress(100);
-    setStep('success');
+    // setStep('success');
 
   } catch (error) {
     console.error(error);
@@ -55,21 +61,53 @@ export const ConsultationUploadPage = () => {
 
         {step === 'upload' && (
           <Card
-            className="p-12 text-center cursor-pointer hover:border-brand-primary transition-colors"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleFileDrop}
+            className={`
+              p-12 text-center cursor-pointer border-2 border-dashed
+              transition-all duration-200
+              ${
+                isDragging
+                  ? 'border-brand-primary bg-brand-primary/5 scale-[1.01]'
+                  : 'border-border-default hover:border-brand-primary'
+              }
+            `}
+            onDragEnter={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+            }}
+            onDrop={(e) => {
+              setIsDragging(false);
+              handleFileDrop(e);
+            }}
           >
-
-            <div className='flex justify-center mb-6'>
+            <div className="flex justify-center mb-6">
               <Mic size={60} strokeWidth={3} absoluteStrokeWidth />
             </div>
-            <h2 className="text-2xl font-display font-bold mb-2">Drop your audio file here</h2>
-            <p className="text-text-secondary mb-6">Supports MP3, WAV, M4A, AAC (Max 500MB)</p>
+
+            <h2 className="text-2xl font-display font-bold mb-3">
+              Drag & Drop Audio File
+            </h2>
+
+            <p className="text-text-secondary mb-2">
+              Drop your consultation recording here
+            </p>
+
+            <p className="text-sm text-text-secondary mb-6">
+              or click below to browse files
+            </p>
+
             <input
               id="audio-upload"
               type="file"
-              className='hidden'
-              accept=".mp3,.wav,.m4a,.aac,.mpeg"
+              className="hidden"
+              accept=".mp3,.wav,.m4a,.aac,.mpeg,.aiff,.flac,.alac,.mp4"
               onChange={(e) => {
                 const selectedFile = e.target.files[0];
 
@@ -82,10 +120,25 @@ export const ConsultationUploadPage = () => {
 
             <label
               htmlFor="audio-upload"
-              className="inline-block px-4 py-2 bg-blue-600 text-white rounded cursor-pointer"
+              className="
+                inline-flex items-center px-5 py-2.5
+                bg-brand-primary text-white
+                rounded-lg cursor-pointer
+                hover:opacity-90 transition
+              "
             >
               Browse Files
-            </label> 
+            </label>
+
+            <p className="text-xs text-text-secondary mt-6">
+              Supports MP3, WAV, M4A, AAC • Max 500 MB
+            </p>
+
+            {isDragging && (
+              <p className="mt-4 text-brand-primary font-medium">
+                Release to upload
+              </p>
+            )}
           </Card>
         )}
 

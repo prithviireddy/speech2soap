@@ -1,16 +1,20 @@
 Execution flow
 
-Audio File
-   ↓
-speaker_diarization.py
-   ↓
-merge_consecutive_speakers.py
-   ↓
-ner_extractor.py
-   ↓
-outputs
-
-
+React
+  ↓
+uploadAudio()
+  ↓
+Axios
+  ↓
+FastAPI
+  ↓
+Whisper
+  ↓
+Diarization
+  ↓
+LLM
+  ↓
+Clinical Report
 
 
 SOAP (Subjective, Objective, Assessment, Plan)
@@ -18,7 +22,7 @@ SOAP (Subjective, Objective, Assessment, Plan)
 
 Raw Dialogue
    ↓
-nvidia nemo / speaker diarization
+whisper / speaker diarization
    ↓
 transcript cleanup
    ↓
