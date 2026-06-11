@@ -57,3 +57,16 @@ clinical-report/
 ├── .env
 ├── requirements.txt
 └── README.md
+
+
+Doctor uploads audio
+        ↓
+Transcript generated
+        ↓
+Clinical report generated
+        ↓
+Doctor reviews
+        ↓
+Doctor edits if needed
+        ↓
+Doctor approves

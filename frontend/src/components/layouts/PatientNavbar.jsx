@@ -1,50 +1,59 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../../App.jsx';
 import { Link } from 'react-router-dom';
 import { Bell, User, LogOut, Settings } from 'lucide-react';
 
-/**
- * Navbar Component (Generic)
- * 
- * Top navigation bar for dashboard pages
- * Provides logo, navigation links, notifications, and user menu
- * 
- * Features:
- * - Responsive design with mobile menu toggle
- * - User profile menu with logout
- * - Notification bell (placeholder)
- * - Logo with app branding
- * - Glassmorphic design with backdrop blur
- */
-export const Navbar = ({ onMenuToggle }) => {
+export const PatientNavbar = ({ onMenuToggle }) => {
   const { user, logout } = useAuth();
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
 
-  // Placeholder notifications
   const notifications = [
-    { id: 1, text: 'New update available', time: '5 min ago', type: 'info' },
-    { id: 2, text: 'Your session will expire soon', time: '1 hour ago', type: 'warning' },
-    { id: 3, text: 'System maintenance scheduled', time: '3 hours ago', type: 'info' },
+    { id: 1, text: 'New report available: Annual Checkup', time: '1 hour ago', type: 'info' },
+    { id: 2, text: 'Medication reminder: Take Lisinopril', time: '4 hours ago', type: 'warning' },
+    { id: 3, text: 'Follow-up scheduled: Lab work due soon', time: '1 day ago', type: 'info' },
   ];
 
   return (
     <nav className="fixed top-0 left-0 w-full bg-gradient-to-b from-white/90 to-white/70 backdrop-blur-lg border-b border-border-default/40 z-40 h-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition">
+        <Link to="/patient/dashboard" className="flex items-center gap-2 hover:opacity-80 transition">
           <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-medical rounded-lg flex items-center justify-center">
             <span className="text-white font-display font-bold text-lg">C2</span>
           </div>
           <h1 className="text-brand-primary font-display font-bold text-xl hidden sm:block">
             Clinic2Report
           </h1>
+          <span className="hidden lg:inline ml-2 px-2 py-1 bg-success/10 text-success text-xs rounded-full font-medium">
+            Patient
+          </span>
         </Link>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex gap-8">
+          {[
+            { label: 'Dashboard', link: '/patient/dashboard' },
+            { label: 'Reports', link: '/patient/reports' },
+            { label: 'Medications', link: '/patient/medications' },
+            { label: 'Followups', link: '/patient/followups' },
+            { label: 'Health Assistant', link: '/patient/assistant' },
+          ].map((nav) => (
+            <Link
+              key={nav.label}
+              to={nav.link}
+              className="text-sm font-medium text-text-primary hover:text-brand-primary transition-colors relative group"
+            >
+              {nav.label}
+              <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-primary group-hover:w-full transition-all duration-300"></span>
+            </Link>
+          ))}
+        </div>
 
         {/* Right Actions */}
         <div className="flex items-center gap-4">
           {/* Notifications */}
-          <div className="relative hidden sm:block">
+          <div className="relative">
             <button
               onClick={() => setNotificationsOpen(!notificationsOpen)}
               className="relative p-2 text-text-primary hover:text-brand-primary transition-colors hover:bg-bg-base rounded-lg"
@@ -56,7 +65,7 @@ export const Navbar = ({ onMenuToggle }) => {
             {notificationsOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-border-default overflow-hidden z-50">
                 <div className="px-4 py-3 border-b border-border-default">
-                  <p className="font-medium text-sm">Notifications</p>
+                  <p className="font-medium text-sm">Health Notifications</p>
                 </div>
                 <div className="max-h-64 overflow-y-auto">
                   {notifications.map((notif) => (
@@ -77,17 +86,17 @@ export const Navbar = ({ onMenuToggle }) => {
           <div className="relative">
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-medical flex items-center justify-center text-white font-display font-bold hover:shadow-md transition-shadow"
+              className="w-10 h-10 rounded-full bg-gradient-to-br from-success to-medical flex items-center justify-center text-white font-display font-bold hover:shadow-md transition-shadow"
             >
-              {user?.initial || 'U'}
+              {user?.initial || 'P'}
             </button>
 
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-border-default overflow-hidden z-50">
                 <div className="px-4 py-3 border-b border-border-default bg-bg-base">
-                  <p className="font-medium text-sm">{user?.name || 'User'}</p>
-                  <p className="text-xs text-text-secondary">{user?.email || 'user@example.com'}</p>
-                  <p className="text-xs text-brand-primary font-medium mt-1">Dashboard User</p>
+                  <p className="font-medium text-sm">{user?.name || 'Patient'}</p>
+                  <p className="text-xs text-text-secondary">{user?.email || 'patient@example.com'}</p>
+                  <p className="text-xs text-success font-medium mt-1">👤 Patient Account</p>
                 </div>
 
                 <button className="w-full text-left px-4 py-2 hover:bg-bg-base transition-colors text-sm flex items-center gap-2">
