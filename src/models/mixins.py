@@ -1,7 +1,5 @@
-# models/mixins.py
-
 import uuid
-from datetime import datetime
+from datetime import datetime, UTC
 
 from sqlalchemy import DateTime, func
 from sqlalchemy.dialects.postgresql import UUID

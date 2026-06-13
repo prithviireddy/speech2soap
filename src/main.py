@@ -5,8 +5,8 @@ import uvicorn
 from pathlib import Path
 from fastapi import BackgroundTasks
 from fastapi import FastAPI, UploadFile, File
-
-from .services.consultation_service import ConsultationService
+from src.api.auth import router as auth_router
+from src.services.consultation_service import ConsultationService
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -19,6 +19,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.include_router(auth_router)
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent

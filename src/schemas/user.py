@@ -22,7 +22,7 @@ class UserCreate(BaseModel):
         min_length=8,
         max_length=128,
     )
-
+  
     role: UserRole
 
     model_config = ConfigDict(extra="forbid")

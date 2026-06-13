@@ -5,3 +5,5 @@ from .consultation import Consultation
 from .report import Report
 from .medication import Medication
 from .followup import Followup
+from .refresh_token import RefreshToken
+from .password_reset_token import PasswordResetToken

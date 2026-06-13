@@ -38,6 +38,8 @@ dependencies = [
     "psycopg>=3.3.4",
     "pydantic-settings>=2.14.1",
     "alembic>=1.18.4",
+    "pyjwt>=2.13.0",
+    "pwdlib[argon2]>=0.3.0",
 ]
 
 
