@@ -1,10 +1,13 @@
+import uuid
 from enum import Enum
 
-from sqlalchemy import ForeignKey, Integer, String, Enum as SQLEnum
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.base import Base
-from src.models.mixins import UUIDMixin, TimestampMixin
+from src.models.mixins import TimestampMixin, UUIDMixin
 
 
 class ConsultationStatus(str, Enum):
@@ -19,14 +22,16 @@ class ConsultationStatus(str, Enum):
 class Consultation(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "consultations"
 
-    doctor_id: Mapped[str] = mapped_column(
+    doctor_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("doctors.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
 
-    patient_id: Mapped[str] = mapped_column(
-        ForeignKey("patients.id", ondelete="CASCADE"),
+    patient_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("patients.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )

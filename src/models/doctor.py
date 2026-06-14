@@ -1,18 +1,20 @@
+import uuid
 from sqlalchemy import ForeignKey, String
+from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.base import Base
-from src.models.mixins import UUIDMixin, TimestampMixin
+from src.models.mixins import TimestampMixin, UUIDMixin
 
 
 class Doctor(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "doctors"
 
-    user_id: Mapped[str] = mapped_column(
+    user_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("users.id", ondelete="CASCADE"),
         unique=True,
         nullable=False,
-        index=True,
     )
 
     full_name: Mapped[str] = mapped_column(
@@ -29,7 +31,6 @@ class Doctor(Base, UUIDMixin, TimestampMixin):
         String(100),
         unique=True,
         nullable=False,
-        index=True,
     )
 
     phone: Mapped[str] = mapped_column(

@@ -1,19 +1,21 @@
+import uuid
+
 from sqlalchemy import Boolean, ForeignKey
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.db.base import Base
-from src.models.mixins import UUIDMixin, TimestampMixin
+from src.models.mixins import TimestampMixin, UUIDMixin
 
 
 class Report(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "reports"
 
-    consultation_id: Mapped[str] = mapped_column(
+    consultation_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("consultations.id", ondelete="CASCADE"),
         unique=True,
         nullable=False,
-        index=True,
     )
 
     is_approved: Mapped[bool] = mapped_column(

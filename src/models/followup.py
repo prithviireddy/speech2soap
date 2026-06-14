@@ -1,9 +1,10 @@
+import uuid
 from datetime import datetime
 from enum import Enum
 
 from sqlalchemy import DateTime, Enum as SQLEnum, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from sqlalchemy.dialects.postgresql import UUID
 from src.db.base import Base
 from src.models.mixins import UUIDMixin, TimestampMixin
 
@@ -18,13 +19,15 @@ class FollowupStatus(str, Enum):
 class Followup(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "followups"
 
-    patient_id: Mapped[str] = mapped_column(
-        ForeignKey("patients.id", ondelete="CASCADE"),
+    patient_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("patients.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
     )
 
-    doctor_id: Mapped[str] = mapped_column(
+    doctor_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
         ForeignKey("doctors.id", ondelete="RESTRICT"),
         nullable=False,
         index=True,
@@ -66,4 +69,9 @@ class Followup(Base, UUIDMixin, TimestampMixin):
     doctor = relationship(
         "Doctor",
         back_populates="followups",
+    )
+
+    consultation = relationship(
+        "Consultation",
+        back_populates="followups"
     )

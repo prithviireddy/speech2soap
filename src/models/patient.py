@@ -1,27 +1,30 @@
 from datetime import date
-
-from sqlalchemy import Date, ForeignKey, String
+import uuid
+from sqlalchemy import Date, ForeignKey, String, Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-
+from sqlalchemy.dialects.postgresql import UUID
 from src.db.base import Base
 from src.models.mixins import UUIDMixin, TimestampMixin
 
+class Gender(str, Enum):
+    MALE = "MALE"
+    FEMALE = "FEMALE"
+    OTHER = "OTHER"
 
 class Patient(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "patients"
 
-    user_id: Mapped[str] = mapped_column(
-        ForeignKey("users.id", ondelete="CASCADE"),
+    user_id: Mapped[uuid.UUID|None] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id", ondelete="SET NULL"),
         unique=True,
-        nullable=False,
-        index=True,
+        nullable=True,
     )
 
     patient_number: Mapped[str] = mapped_column(
         String(50),
         unique=True,
         nullable=False,
-        index=True,
     )
 
     full_name: Mapped[str] = mapped_column(
@@ -35,7 +38,7 @@ class Patient(Base, UUIDMixin, TimestampMixin):
         index=True,
     )
 
-    date_of_birth: Mapped[date] = mapped_column(
+    date_of_birth: Mapped[Gender] = mapped_column(
         Date,
         nullable=False,
     )
@@ -53,17 +56,16 @@ class Patient(Base, UUIDMixin, TimestampMixin):
     consultations = relationship(
         "Consultation",
         back_populates="patient",
-        cascade="all, delete-orphan",
     )
 
     medications = relationship(
         "Medication",
         back_populates="patient",
-        cascade="all, delete-orphan",
     )
 
     followups = relationship(
         "Followup",
         back_populates="patient",
-        cascade="all, delete-orphan",
     )
+
+    

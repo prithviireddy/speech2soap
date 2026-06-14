@@ -11,19 +11,12 @@ from src.db.base import Base
 from src.models.mixins import UUIDMixin, TimestampMixin
 
 
-class PasswordResetToken(
-    Base,
-    UUIDMixin,
-    TimestampMixin,
-):
+class PasswordResetToken(Base,UUIDMixin,TimestampMixin):
     __tablename__ = "password_reset_tokens"
 
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey(
-            "users.id",
-            ondelete="CASCADE",
-        ),
+        ForeignKey("users.id",ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
