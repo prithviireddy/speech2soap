@@ -1,4 +1,4 @@
-import { useAuth } from '../../../App.jsx';
+import { useAuth } from '../../../context/AuthContext';
 import { PatientLayout } from '../../layouts/PatientLayout';
 import { Card, Badge, Button } from '../../shared';
 import { FileText, Pill, CheckCheck, TrendingUp, Download } from 'lucide-react';

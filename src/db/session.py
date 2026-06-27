@@ -5,7 +5,7 @@ from src.core.config import settings
 
 
 engine = create_engine(
-    settings.DATABASE_URL,
+    settings.database_url,
     pool_pre_ping=True,
     echo=False,
 )
@@ -23,3 +23,4 @@ def get_db():
         yield db
     finally:
         db.close()
+ 

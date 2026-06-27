@@ -4,8 +4,12 @@ import { Card, Button, LoadingSpinner } from '../../shared';
 import { Mic, CheckCheck, Check } from 'lucide-react';
 import { uploadAudio, getJobStatus } from '../../../api/upload';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../../context/AuthContext';
+
 
 export const ConsultationUploadPage = () => {
+  const { user } = useAuth();
+
   const navigate = useNavigate();
   const [step, setStep] = useState('upload'); // upload, details, progress, success
   const [file, setFile] = useState(null);
@@ -15,8 +19,8 @@ export const ConsultationUploadPage = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [formData, setFormData] = useState({
     date: new Date().toISOString().split('T')[0],
-    doctorName: '',
-    chiefComplaint: '',
+    doctorName: user?.name||'',
+    chiefComplaint: '', 
     notes: ''
   });
 
@@ -32,6 +36,8 @@ export const ConsultationUploadPage = () => {
 };
 
   const handleUploadStart = async () => {
+    // console.log('button clicked');
+
     if (!file) return;
 
     try {
@@ -73,7 +79,7 @@ export const ConsultationUploadPage = () => {
   return (
     <DoctorLayout>
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-4xl font-display font-bold mb-2">Upload Consultation</h1>
+        <h1 className="text-4xl font-display font-bold mb-2 pt-5 mt-2">Upload Consultation</h1>
         <p className="text-text-secondary mb-8">Record your patient consultation and let AI generate the clinical report</p>
 
         {/* UPLOAD STEP */}
@@ -203,7 +209,7 @@ export const ConsultationUploadPage = () => {
               <Button
                 variant="primary"
                 onClick={handleUploadStart}
-                disabled={!formData.chiefComplaint}
+                // disabled={!formData.chiefComplaint}
                 className="flex-1"
               >
                 Upload & Process

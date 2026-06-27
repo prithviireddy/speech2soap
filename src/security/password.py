@@ -1,7 +1,7 @@
 from pwdlib import PasswordHash
 
 
-_password_hash = PasswordHash.recommended()
+password_hash = PasswordHash.recommended()
 
 
 def hash_password(password: str) -> str:
@@ -9,13 +9,10 @@ def hash_password(password: str) -> str:
     Hash a plain-text password using the recommended
     Argon2 configuration.
     """
-    return _password_hash.hash(password)
+    return password_hash.hash(password)
 
 
-def verify_password(
-    plain_password: str,
-    hashed_password: str,
-) -> tuple[bool, str | None]:
+def verify_password(plain_password: str, hashed_password: str,) -> tuple[bool, str | None]:
     """
     Verify a password and return:
 
@@ -27,7 +24,4 @@ def verify_password(
     If updated_hash is not None, persist it to the database.
     """
 
-    return _password_hash.verify_and_update(
-        plain_password,
-        hashed_password,
-    )
+    return password_hash.verify_and_update(plain_password,hashed_password)

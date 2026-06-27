@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../../App.jsx';
+import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import { AlertTriangle, User, LogOut } from 'lucide-react';
 

@@ -2,10 +2,9 @@ from uuid import UUID
 from datetime import datetime
 from enum import Enum
 
-from pydantic import BaseModel
 from pydantic import Field
 
-from .common import TimestampSchema
+from .common import TimestampSchema, BaseSchema
 
 
 class FollowupStatus(str, Enum):
@@ -15,7 +14,7 @@ class FollowupStatus(str, Enum):
     CANCELLED = "CANCELLED"
 
 
-class FollowupCreate(BaseModel):
+class FollowupCreate(BaseSchema):
     patient_id: UUID
 
     doctor_id: UUID
@@ -32,7 +31,7 @@ class FollowupCreate(BaseModel):
     scheduled_at: datetime
 
 
-class FollowupUpdate(BaseModel):
+class FollowupUpdate(BaseSchema):
     title: str | None = None
 
     notes: str | None = None

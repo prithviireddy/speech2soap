@@ -6,7 +6,7 @@ import {
   LogOut,
   Home
 } from 'lucide-react';
-import { useAuth } from '../../App.jsx';
+import { useAuth } from '../../context/AuthContext';
 
 /**
  * Sidebar Component (Generic)

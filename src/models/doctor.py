@@ -52,3 +52,8 @@ class Doctor(Base, UUIDMixin, TimestampMixin):
         "Followup",
         back_populates="doctor",
     )
+
+    appointments = relationship(
+        "Appointment",
+        back_populates="doctor",
+    )

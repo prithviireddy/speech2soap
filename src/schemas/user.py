@@ -1,12 +1,11 @@
 from enum import Enum
 
-from pydantic import BaseModel
 from pydantic import ConfigDict
 from pydantic import EmailStr
 from pydantic import Field
 from pydantic import field_validator
 
-from .common import TimestampSchema
+from .common import TimestampSchema, BaseSchema
 
 
 class UserRole(str, Enum):
@@ -15,7 +14,7 @@ class UserRole(str, Enum):
     PATIENT = "PATIENT"
 
 
-class UserCreate(BaseModel):
+class UserCreate(BaseSchema):
     email: EmailStr
 
     password: str = Field(
@@ -37,7 +36,7 @@ class UserCreate(BaseModel):
         return value
 
 
-class UserUpdate(BaseModel):
+class UserUpdate(BaseSchema):
     email: EmailStr | None = None
 
     is_active: bool | None = None

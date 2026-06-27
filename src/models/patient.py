@@ -38,7 +38,7 @@ class Patient(Base, UUIDMixin, TimestampMixin):
         index=True,
     )
 
-    date_of_birth: Mapped[Gender] = mapped_column(
+    date_of_birth: Mapped[date] = mapped_column(
         Date,
         nullable=False,
     )
@@ -68,4 +68,7 @@ class Patient(Base, UUIDMixin, TimestampMixin):
         back_populates="patient",
     )
 
-    
+    appointments = relationship(
+        "Appointment",
+        back_populates="patient",
+    )

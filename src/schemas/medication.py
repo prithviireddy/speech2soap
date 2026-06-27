@@ -1,12 +1,11 @@
 from uuid import UUID
 
-from pydantic import BaseModel
 from pydantic import Field
 
-from .common import TimestampSchema
+from .common import TimestampSchema,BaseSchema
 
 
-class MedicationCreate(BaseModel):
+class MedicationCreate(BaseSchema):
     patient_id: UUID
 
     report_id: UUID
@@ -29,7 +28,7 @@ class MedicationCreate(BaseModel):
     instructions: str | None = None
 
 
-class MedicationUpdate(BaseModel):
+class MedicationUpdate(BaseSchema):
     name: str | None = None
 
     dosage: str | None = None

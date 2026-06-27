@@ -1,10 +1,9 @@
 from uuid import UUID
 from enum import Enum
 
-from pydantic import BaseModel
 from pydantic import Field
 
-from .common import TimestampSchema
+from .common import TimestampSchema,BaseSchema
 
 
 class ConsultationStatus(str, Enum):
@@ -16,15 +15,13 @@ class ConsultationStatus(str, Enum):
     FAILED = "FAILED"
 
 
-class ConsultationCreate(BaseModel):
-    patient_id: UUID
-
-    audio_file_path: str = Field(
-        min_length=1,
-    )
+class ConsultationCreate(BaseSchema):
+    appointment_id: UUID
+    chief_complaint: str | None
+    doctor_notes: str | None
 
 
-class ConsultationUpdate(BaseModel):
+class ConsultationUpdate(BaseSchema):
     status: ConsultationStatus | None = None
 
     progress: int | None = Field(

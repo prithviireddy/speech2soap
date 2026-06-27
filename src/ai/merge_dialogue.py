@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 OUTPUT_DIR = BASE_DIR / "data/processed/merged_transcripts"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

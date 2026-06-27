@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuth } from '../../App.jsx';
+import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import { Bell, User, LogOut, Settings } from 'lucide-react';
 
@@ -19,11 +19,11 @@ export const PatientNavbar = ({ onMenuToggle }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
         {/* Logo */}
         <Link to="/patient/dashboard" className="flex items-center gap-2 hover:opacity-80 transition">
-          <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-medical rounded-lg flex items-center justify-center">
+          {/* <div className="w-10 h-10 bg-gradient-to-br from-brand-primary to-medical rounded-lg flex items-center justify-center">
             <span className="text-white font-display font-bold text-lg">C2</span>
-          </div>
+          </div> */}
           <h1 className="text-brand-primary font-display font-bold text-xl hidden sm:block">
-            Clinic2Report
+            ClinicReport
           </h1>
           <span className="hidden lg:inline ml-2 px-2 py-1 bg-success/10 text-success text-xs rounded-full font-medium">
             Patient

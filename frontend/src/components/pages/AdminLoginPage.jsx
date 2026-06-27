@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../../App.jsx';
+import { useAuth } from '../../context/AuthContext';
 import { AuthLayout } from '../layouts';
 import { Button, Card } from '../shared';
 import { useNavigate } from 'react-router-dom';

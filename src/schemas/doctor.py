@@ -1,18 +1,16 @@
 from uuid import UUID
 
-from pydantic import BaseModel
 from pydantic import EmailStr
 from pydantic import Field
 
-from .common import TimestampSchema
+from .common import TimestampSchema,BaseSchema
 from .user import UserRead
-from .user import UserRole
 
 
 
 
 
-class DoctorRegistration(BaseModel):
+class DoctorRegistration(BaseSchema):
     email: EmailStr
 
     password: str = Field(
@@ -40,10 +38,8 @@ class DoctorRegistration(BaseModel):
         max_length=20,
     )
 
-    role: UserRole = UserRole.DOCTOR
 
-
-class DoctorUpdate(BaseModel):
+class DoctorUpdate(BaseSchema):
     full_name: str | None = None
 
     specialization: str | None = None

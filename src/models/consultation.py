@@ -2,7 +2,7 @@ import uuid
 from enum import Enum
 
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import ForeignKey, Integer, String
+from sqlalchemy import ForeignKey, Integer, String, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -21,6 +21,13 @@ class ConsultationStatus(str, Enum):
 
 class Consultation(Base, UUIDMixin, TimestampMixin):
     __tablename__ = "consultations"
+
+    appointment_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("appointments.id", ondelete="RESTRICT"),
+        nullable=False,
+        unique=True,
+    )
 
     doctor_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
@@ -51,10 +58,20 @@ class Consultation(Base, UUIDMixin, TimestampMixin):
         nullable=False,
     )
 
+    current_stage: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True,
+    )
+
     status: Mapped[ConsultationStatus] = mapped_column(
         SQLEnum(ConsultationStatus),
         nullable=False,
         index=True,
+    )
+
+    appointment = relationship(
+        "Appointment",
+        back_populates="consultation",
     )
 
     doctor = relationship(
@@ -72,4 +89,19 @@ class Consultation(Base, UUIDMixin, TimestampMixin):
         back_populates="consultation",
         uselist=False,
         cascade="all, delete-orphan",
+    )
+
+    chief_complaint: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True,
+    )
+
+    doctor_notes: Mapped[str | None] = mapped_column(
+        Text,
+        nullable=True,
+    )
+
+    followups = relationship(
+        "Followup",
+        back_populates="consultation",
     )

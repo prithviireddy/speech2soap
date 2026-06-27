@@ -1,38 +1,80 @@
-from .transcription.speaker_diarization import transcribe_audio
-from .processing.merge_dialogue import merge_dialogue
-from .reporting.generate_report import generate_clinical_report
-
 import json
+
+from src.db.session import SessionLocal
+from src.models.consultation import Consultation, ConsultationStatus
+from src.models.report import Report
+from src.utils.consultation_progress import update_progress
+
+from ..ai.merge_dialogue import merge_dialogue
+from ..ai.generate_report import generate_clinical_report
+from ..ai.speaker_diarization import transcribe_audio
 
 
 class ConsultationService:
     @staticmethod
-    def process_audio(audio_path, job_id, jobs):
+    def process_audio(audio_path, consultation_id):
+
+        db = SessionLocal()
 
         try:
-            jobs[job_id]["progress"] = 10
-            jobs[job_id]["stage"] = "transcription"
+            update_progress(
+                db,
+                consultation_id,
+                10,
+                "Transcription",
+                ConsultationStatus.TRANSCRIBING,
+            )
 
-            diarized_path = transcribe_audio(audio_path, job_id, jobs)
+            diarized_path = transcribe_audio(db, audio_path, consultation_id)
 
-            jobs[job_id]["progress"] = 90
-            jobs[job_id]["stage"] = "Processing Transcript"
+            update_progress(
+                db,
+                consultation_id,
+                90,
+                "Processing Transcript",
+                ConsultationStatus.PROCESSING,
+            )
 
             merged_path = merge_dialogue(diarized_path)
 
-            jobs[job_id]["progress"] = 95
-            jobs[job_id]["stage"] = "Generating Clinical Report"
+            update_progress(
+                db,
+                consultation_id,
+                95,
+                "Generating Clinical Report",
+            )
 
             report_path = generate_clinical_report(merged_path)
 
             with open(report_path, "r", encoding="utf-8") as f:
                 report = json.load(f)
 
-            jobs[job_id]["progress"] = 100
-            jobs[job_id]["stage"] = "completed"
-            jobs[job_id]["status"] = "completed"
-            jobs[job_id]["report"] = report
+            report_record = Report(
+                consultation_id=consultation_id,
+                report_json=report,
+                is_approved=False,
+            )
+
+            db.add(report_record)
+
+            consultation = db.get(
+                Consultation,
+                consultation_id,
+            )
+
+            consultation.progress = 100
+            consultation.current_stage = "Completed"
+            consultation.status = ConsultationStatus.REVIEW_PENDING
+            db.commit()
 
         except Exception as e:
-            jobs[job_id]["status"] = "failed"
-            jobs[job_id]["error"] = str(e)
+            consultation = db.get(
+                Consultation,
+                consultation_id,
+            )
+
+            consultation.status = ConsultationStatus.FAILED
+            db.commit()
+
+        finally:
+            db.close()

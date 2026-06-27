@@ -2,17 +2,17 @@ from datetime import datetime
 from uuid import UUID
 
 from pydantic import (
-    BaseModel,
     ConfigDict,
     EmailStr,
     Field,
 )
 
-
 from src.models.user import UserRole
 
+from .common import BaseSchema
 
-class LoginRequest(BaseModel):
+
+class LoginRequest(BaseSchema):
     email: EmailStr
     password: str = Field(
         min_length=8,
@@ -20,21 +20,16 @@ class LoginRequest(BaseModel):
     )
 
 
-class TokenResponse(BaseModel):
+class TokenResponse(BaseSchema):
     access_token: str
-    refresh_token: str
     token_type: str = "bearer"
 
 
-class RefreshTokenRequest(BaseModel):
-    refresh_token: str
-
-
-class ForgotPasswordRequest(BaseModel):
+class ForgotPasswordRequest(BaseSchema):
     email: EmailStr
 
 
-class ResetPasswordRequest(BaseModel):
+class ResetPasswordRequest(BaseSchema):
     token: str
 
     new_password: str = Field(
@@ -43,7 +38,7 @@ class ResetPasswordRequest(BaseModel):
     )
 
 
-class CurrentUserResponse(BaseModel):
+class CurrentUserResponse(BaseSchema):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
@@ -52,6 +47,7 @@ class CurrentUserResponse(BaseModel):
     is_active: bool
     created_at: datetime
 
-class AccessTokenResponse(BaseModel):
+
+class AccessTokenResponse(BaseSchema):
     access_token: str
     token_type: str = "bearer"

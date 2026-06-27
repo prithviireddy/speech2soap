@@ -1,16 +1,14 @@
 from uuid import UUID
 from typing import Any
 
-from pydantic import BaseModel
-
-from .common import TimestampSchema
+from .common import TimestampSchema, BaseSchema
 
 
-class ReportUpdate(BaseModel):
+class ReportUpdate(BaseSchema):
     report_json: dict[str, Any]
 
 
-class ReportApprove(BaseModel):
+class ReportApprove(BaseSchema):
     approved: bool = True
 
 
@@ -24,7 +22,7 @@ class ReportRead(TimestampSchema):
     transcript_json: dict[str, Any] | None
 
 
-class ReportSummary(BaseModel):
+class ReportSummary(BaseSchema):
     id: UUID
 
     consultation_id: UUID

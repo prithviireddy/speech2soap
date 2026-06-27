@@ -1,17 +1,14 @@
 from uuid import UUID
 from datetime import date
 
-from pydantic import BaseModel
 from pydantic import EmailStr
 from pydantic import Field
 
-from .common import TimestampSchema
+from .common import TimestampSchema,BaseSchema
 from .user import UserRead
-from .user import UserRole
 
 
-
-class PatientRegistration(BaseModel):
+class PatientRegistration(BaseSchema):
     email: EmailStr
 
     password: str = Field(
@@ -19,20 +16,14 @@ class PatientRegistration(BaseModel):
         max_length=128,
     )
 
-    patient_number: str
-
     full_name: str
-
     phone: str
-
     date_of_birth: date
-
     gender: str
 
-    role: UserRole = UserRole.PATIENT
 
 
-class PatientUpdate(BaseModel):
+class PatientUpdate(BaseSchema):
     full_name: str | None = None
 
     phone: str | None = None

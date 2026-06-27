@@ -14,7 +14,7 @@ load_dotenv()
 
 client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
 
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 OUTPUT_DIR = BASE_DIR / "data/processed/clinical_reports_test"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

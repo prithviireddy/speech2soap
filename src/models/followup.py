@@ -33,7 +33,7 @@ class Followup(Base, UUIDMixin, TimestampMixin):
         index=True,
     )
 
-    consultation_id: Mapped[str | None] = mapped_column(
+    consultation_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("consultations.id", ondelete="SET NULL"),
         nullable=True,
         index=True,

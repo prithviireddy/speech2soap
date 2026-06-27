@@ -1,31 +1,35 @@
 import { useState } from 'react';
-import { useAuth } from '../../App.jsx';
+import { useAuth } from '../../context/AuthContext';
 import { AuthLayout } from '../layouts';
 import { Button, Card } from '../shared';
-import { useNavigate } from 'react-router-dom';
 
 export const LoginPage = () => {
-  const { loginDoctor, loginPatient } = useAuth();
-  const navigate = useNavigate();
+  const { login } = useAuth();
   const [userType, setUserType] = useState(null); // 'doctor' | 'patient'
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+
+    setError("");
 
     if (!formData.email || !formData.password) {
-      setError('Please fill in all fields');
+      setError("Please fill in all fields");
       return;
     }
 
-    if (userType === 'doctor') {
-      loginDoctor(formData.email, `Dr. ${formData.email.split('@')[0]}`);
-      navigate('/dashboard');
-    } else if (userType === 'patient') {
-      loginPatient(formData.email, formData.email.split('@')[0]);
-      navigate('/patient/dashboard');
+    try {
+      await login(
+        formData.email,
+        formData.password
+      );
+
+    } catch (error) {
+      setError(
+        error.response?.data?.detail ??
+        "Login failed"
+      );
     }
   };
 

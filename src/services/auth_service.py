@@ -1,14 +1,20 @@
 from __future__ import annotations
 
 import hashlib
+from datetime import UTC, datetime
 
 from fastapi import HTTPException, status
+from pydantic import EmailStr
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.models.refresh_token import RefreshToken
 from src.models.user import User
-from src.schemas.auth import TokenResponse
+from src.schemas.internal import LoginResult
+from src.security.exceptions import (
+    InvalidRefreshTokenError,
+    InvalidTokenError,
+)
 from src.security.jwt import (
     create_access_token,
     create_refresh_token,
@@ -22,9 +28,9 @@ class AuthService:
     @staticmethod
     def login(
         db: Session,
-        email: str,
+        email: EmailStr,
         password: str,
-    ) -> TokenResponse:
+    ) -> LoginResult:
 
         user = db.scalar(select(User).where(User.email == email))
 
@@ -34,29 +40,21 @@ class AuthService:
                 detail="Invalid credentials",
             )
 
-        is_valid, new_hash = verify_password(
-            password,
-            user.password_hash,
-        )
+        is_valid, new_hash = verify_password(password, user.password_hash)
 
         if not is_valid:
             raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid credentials",
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials"
             )
 
         if new_hash:
             user.password_hash = new_hash
 
-        access_token = create_access_token(
-            subject=str(user.id),
-            role=user.role.value,
-        )
+        access_token = create_access_token(subject=str(user.id), role=user.role.value)
 
-        refresh_token = create_refresh_token(
-            subject=str(user.id),
-        )
+        refresh_token = create_refresh_token(subject=str(user.id))
 
+        # hash refresh token to save
         token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
 
         db_token = RefreshToken(
@@ -68,7 +66,7 @@ class AuthService:
         db.add(db_token)
         db.commit()
 
-        return TokenResponse(
+        return LoginResult(
             access_token=access_token,
             refresh_token=refresh_token,
         )
@@ -77,12 +75,10 @@ class AuthService:
     def logout(
         db: Session,
         user: User,
-        refresh_token: str,
+        refresh_token: str
     ) -> None:
 
-        token_hash = hashlib.sha256(
-            refresh_token.encode()
-        ).hexdigest()
+        token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
 
         token = db.scalar(
             select(RefreshToken).where(
@@ -101,7 +97,14 @@ class AuthService:
         refresh_token: str,
     ) -> str:
 
-        verify_refresh_token(refresh_token)
+        try:
+            payload = verify_refresh_token(refresh_token)
+
+        except (InvalidTokenError, InvalidRefreshTokenError):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid refresh token",
+            )
 
         token_hash = hashlib.sha256(refresh_token.encode()).hexdigest()
 
@@ -112,7 +115,11 @@ class AuthService:
             )
         )
 
-        if not db_token:
+        if (
+            not db_token
+            or str(db_token.user_id) != payload["sub"]
+            or db_token.expires_at < datetime.now(UTC)
+        ):
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid refresh token",
