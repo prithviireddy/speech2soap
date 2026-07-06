@@ -1,4 +1,4 @@
-import { DoctorLayout } from '../../layouts/DoctorLayout';
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Card, Button, Badge } from '../../shared';
 import { CheckCheck, Plus } from 'lucide-react';
 
@@ -10,7 +10,7 @@ export const DoctorFollowupManagement = () => {
   ];
 
   return (
-    <DoctorLayout>
+    <DashboardLayout>
       <div className="space-y-8">
         <div className="flex justify-between items-center">
           <div>
@@ -57,6 +57,6 @@ export const DoctorFollowupManagement = () => {
           </div>
         </Card>
       </div>
-    </DoctorLayout>
+    </DashboardLayout>
   );
 };

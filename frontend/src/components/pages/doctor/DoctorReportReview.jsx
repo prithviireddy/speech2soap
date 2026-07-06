@@ -1,4 +1,4 @@
-import { DoctorLayout } from '../../layouts/DoctorLayout';
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Card, Button, Badge } from '../../shared';
 import { useParams } from 'react-router-dom';
 
@@ -6,7 +6,7 @@ export const DoctorReportReview = () => {
   const { reportId } = useParams();
 
   return (
-    <DoctorLayout>
+    <DashboardLayout>
       <div className="space-y-8">
         <div>
           <h1 className="text-4xl font-display font-bold">Report Review</h1>
@@ -25,6 +25,6 @@ export const DoctorReportReview = () => {
           </div>
         </Card>
       </div>
-    </DoctorLayout>
+    </DashboardLayout>
   );
 };

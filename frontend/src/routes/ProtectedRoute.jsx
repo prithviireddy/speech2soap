@@ -4,13 +4,13 @@ import { useAuth } from "../context/AuthContext";
 
 export const getDashboardPath = (role) => {
   switch (role) {
-    case "doctor":
-      return "/dashboard";
+    case "DOCTOR":
+      return "/doctor/dashboard";
 
-    case "patient":
+    case "PATIENT":
       return "/patient/dashboard";
 
-    case "admin":
+    case "ADMIN":
       return "/admin/dashboard";
 
     default:
@@ -22,11 +22,7 @@ export const ProtectedRoute = ({
   children,
   allowedRoles,
 }) => {
-  const {
-    loading,
-    isAuthenticated,
-    role,
-  } = useAuth();
+  const { loading, isAuthenticated, role} = useAuth();
 
   if (loading) {
     return (

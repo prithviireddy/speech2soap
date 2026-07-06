@@ -1,5 +1,5 @@
 import { useAuth } from '../../../context/AuthContext';
-import { PatientLayout } from '../../layouts/PatientLayout';
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Card, Badge, Button } from '../../shared';
 import { FileText, Pill, CheckCheck, TrendingUp, Download } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -33,7 +33,7 @@ export const PatientDashboard = () => {
   };
 
   return (
-    <PatientLayout>
+    <DashboardLayout>
       <div className="space-y-8">
         {/* Header */}
         <div className="space-y-2">
@@ -155,6 +155,6 @@ export const PatientDashboard = () => {
           </div>
         </div>
       </div>
-    </PatientLayout>
+    </DashboardLayout>
   );
 };

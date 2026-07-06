@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from src.db.session import get_db
 from src.dependencies.auth import get_current_admin
-from src.models.user import User
 from src.schemas.doctor import DoctorRegistration, DoctorRead
 from src.schemas.patient import PatientRegistration, PatientRead
 from src.services.admin_service import AdminService
@@ -33,6 +32,16 @@ def create_doctor(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         )
+    
+@router.get(
+    "/doctors",
+    response_model=list[DoctorRead],
+)
+def list_doctors(
+    db: Session = Depends(get_db),
+):
+    service = AdminService(db)
+    return service.list_doctors()
     
 @router.post(
     "/patients",

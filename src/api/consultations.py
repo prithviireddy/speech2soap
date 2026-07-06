@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 UPLOAD_DIR = BASE_DIR / "data/uploads"
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
-@router.post("/upload")
+@router.post("/doctor/upload")
 async def analyze_audio(
     background_tasks: BackgroundTasks,
     appointment_id: uuid.UUID = Form(...),

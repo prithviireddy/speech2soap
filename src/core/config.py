@@ -28,4 +28,4 @@ class Settings(BaseSettings):
 
 
 
-settings = Settings()# type: ignore[call-arg] #loaded from dotenv file
+settings = Settings()  # type: ignore[call-arg] #loaded from dotenv file

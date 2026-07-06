@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PatientLayout } from '../../layouts/PatientLayout';
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Card, Button } from '../../shared';
 import { SendHorizontal } from 'lucide-react';
 
@@ -34,7 +34,7 @@ export const PatientAIAssistant = () => {
   };
 
   return (
-    <PatientLayout>
+    <DashboardLayout>
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 max-w-6xl">
         {/* Chat Area */}
         <div className="lg:col-span-3">
@@ -116,6 +116,6 @@ export const PatientAIAssistant = () => {
           </Card>
         </div>
       </div>
-    </PatientLayout>
+    </DashboardLayout>
   );
 };

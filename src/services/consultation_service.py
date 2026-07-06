@@ -12,7 +12,7 @@ from ..ai.speaker_diarization import transcribe_audio
 
 class ConsultationService:
     @staticmethod
-    def process_audio(audio_path, consultation_id):
+    def process_audio(audio_path, consultation_id) -> None:
 
         db = SessionLocal()
 

@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { AuthLayout } from '../layouts';
+import { AuthLayout } from '../layouts/AuthLayout';
 import { Button, Card } from '../shared';
 
 export const LoginPage = () => {
   const { login } = useAuth();
-  const [userType, setUserType] = useState(null); // 'doctor' | 'patient'
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
 
@@ -33,59 +32,14 @@ export const LoginPage = () => {
     }
   };
 
-  if (!userType) {
-    return (
-      <AuthLayout>
-        <Card className="space-y-6">
-          <h2 className="text-2xl font-display font-bold text-center">I'm a...</h2>
-          <div className="space-y-3">
-            <button
-              onClick={() => setUserType('doctor')}
-              className="w-full p-4 rounded-lg border-2 border-border-default hover:border-brand-primary hover:bg-brand-primary/5 transition-all text-left group"
-            >
-              <div className="text-2xl mb-2">👨‍⚕️</div>
-              <h3 className="font-display font-bold group-hover:text-brand-primary">Healthcare Provider</h3>
-              <p className="text-sm text-text-secondary">Doctor, clinician, or medical staff</p>
-            </button>
-
-            <button
-              onClick={() => setUserType('patient')}
-              className="w-full p-4 rounded-lg border-2 border-border-default hover:border-brand-primary hover:bg-brand-primary/5 transition-all text-left group"
-            >
-              <div className="text-2xl mb-2">👤</div>
-              <h3 className="font-display font-bold group-hover:text-brand-primary">Patient</h3>
-              <p className="text-sm text-text-secondary">Access your medical records</p>
-            </button>
-          </div>
-
-          <div className="text-center pt-4 border-t border-border-default">
-            <p className="text-xs text-text-secondary mb-3">Admin access?</p>
-            <a href="/admin-login" className="text-xs text-brand-primary hover:underline font-medium">
-              Admin Portal →
-            </a>
-          </div>
-        </Card>
-      </AuthLayout>
-    );
-  }
 
   return (
     <AuthLayout>
       <Card className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-display font-bold">
-            {userType === 'doctor' ? 'Doctor Login' : 'Patient Login'}
+            Sign in
           </h2>
-          <button
-            onClick={() => {
-              setUserType(null);
-              setFormData({ email: '', password: '' });
-              setError('');
-            }}
-            className="text-text-secondary hover:text-text-primary text-xl"
-          >
-            ←
-          </button>
         </div>
 
         {error && (
@@ -129,24 +83,14 @@ export const LoginPage = () => {
           </div>
 
           <Button size="lg" variant="primary">
-            {userType === 'doctor' ? 'Sign In as Doctor' : 'Sign In as Patient'}
+            Sign in
           </Button>
         </form>
 
-        <div className="relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-border-default"></div>
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-2 bg-white text-text-secondary">
-              {userType === 'doctor' ? 'New to Clinic2Report?' : "Don't have an account?"}
-            </span>
-          </div>
-        </div>
-
-        <Button size="lg" variant="outline">
-          {userType === 'doctor' ? 'Register as Provider' : 'Create Patient Account'}
-        </Button>
+        <p className="text-center text-sm text-text-secondary">
+          Accounts are provisioned by your clinic administrator.
+          Contact your administrator if you need access.
+      </p>
       </Card>
     </AuthLayout>
   );

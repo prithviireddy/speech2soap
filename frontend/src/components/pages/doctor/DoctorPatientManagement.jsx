@@ -1,4 +1,4 @@
-import { DoctorLayout } from '../../layouts/DoctorLayout';
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Card, Button, Badge } from '../../shared';
 import { Users, Search, Plus } from 'lucide-react';
 import { useState } from 'react';
@@ -14,7 +14,7 @@ export const DoctorPatientManagement = () => {
   ];
 
   return (
-    <DoctorLayout>
+    <DashboardLayout>
       <div className="space-y-8">
         <div className="flex justify-between items-center">
           <div>
@@ -73,6 +73,6 @@ export const DoctorPatientManagement = () => {
           </div>
         </Card>
       </div>
-    </DoctorLayout>
+    </DashboardLayout>
   );
 };

@@ -23,7 +23,7 @@ const logAudit = (action, details) => {
     `[AUDIT ${timestamp}] ${action}:`,
     details
   );
-};
+};    
 
 export const AuthProvider = ({ children }) => {
   const [authState, setAuthState] = useState({
@@ -40,15 +40,11 @@ export const AuthProvider = ({ children }) => {
 
   const restoreSession = async () => {
     try {
-      const refreshResponse = await api.post(
-        "/auth/refresh"
-      );
+      const refreshResponse = await api.post("/auth/refresh"); {/* returns access token*/}
 
-      const accessToken =
-        refreshResponse.data.access_token;
+      const accessToken = refreshResponse.data.access_token;
 
-      api.defaults.headers.common.Authorization =
-        `Bearer ${accessToken}`;
+      api.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
 
       const meResponse = await api.get("/auth/me");
 

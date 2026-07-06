@@ -7,7 +7,7 @@ export const uploadAudio = async (file) => {
     formData.append("file", file);
 
     const response = await api.post(
-        "/upload",
+        "/doctor/upload",
         formData,
         {
             headers: {

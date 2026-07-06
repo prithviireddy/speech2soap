@@ -1,4 +1,4 @@
-import { PatientLayout } from '../../layouts/PatientLayout';
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Card, Button, Badge } from '../../shared';
 import { Calendar, User, Download, Share2 } from 'lucide-react';
 
@@ -31,7 +31,7 @@ export const PatientReportViewer = () => {
   ];
 
   return (
-    <PatientLayout>
+    <DashboardLayout>
       <div className="space-y-8">
         <div>
           <h1 className="text-4xl font-display font-bold">My Medical Reports</h1>
@@ -71,6 +71,6 @@ export const PatientReportViewer = () => {
           ))}
         </div>
       </div>
-    </PatientLayout>
+    </DashboardLayout>
   );
 };

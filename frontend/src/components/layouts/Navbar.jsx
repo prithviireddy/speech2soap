@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import { Bell, User, LogOut, Settings } from 'lucide-react';
 
+
 /**
  * Navbar Component (Generic)
  * 
@@ -87,7 +88,7 @@ export const Navbar = ({ onMenuToggle }) => {
                 <div className="px-4 py-3 border-b border-border-default bg-bg-base">
                   <p className="font-medium text-sm">{user?.name || 'User'}</p>
                   <p className="text-xs text-text-secondary">{user?.email || 'user@example.com'}</p>
-                  <p className="text-xs text-brand-primary font-medium mt-1">Dashboard User</p>
+                  <p className="text-xs text-brand-primary font-medium mt-1">{user.role}</p>
                 </div>
 
                 <button className="w-full text-left px-4 py-2 hover:bg-bg-base transition-colors text-sm flex items-center gap-2">

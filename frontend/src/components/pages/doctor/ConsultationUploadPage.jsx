@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { DoctorLayout } from '../../layouts/DoctorLayout';
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Card, Button, LoadingSpinner } from '../../shared';
 import { Mic, CheckCheck, Check } from 'lucide-react';
 import { uploadAudio, getJobStatus } from '../../../api/upload';
@@ -77,7 +77,7 @@ export const ConsultationUploadPage = () => {
   ];
 
   return (
-    <DoctorLayout>
+    <DashboardLayout>
       <div className="max-w-2xl mx-auto">
         <h1 className="text-4xl font-display font-bold mb-2 pt-5 mt-2">Upload Consultation</h1>
         <p className="text-text-secondary mb-8">Record your patient consultation and let AI generate the clinical report</p>
@@ -297,7 +297,7 @@ export const ConsultationUploadPage = () => {
               </Button>
               <Button
                 variant="primary"
-                onClick={() => navigate('/dashboard')}
+                onClick={() => navigate('/doctor/dashboard')}
                 className="flex-1"
               >
                 View in Dashboard
@@ -306,6 +306,6 @@ export const ConsultationUploadPage = () => {
           </Card>
         )}
       </div>
-    </DoctorLayout>
+    </DashboardLayout>
   );
 };

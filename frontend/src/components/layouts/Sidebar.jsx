@@ -7,6 +7,9 @@ import {
   Home
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { adminNav } from "../navigation/adminNav";
+import { doctorNav } from "../navigation/doctorNav";
+import { patientNav } from "../navigation/patientNav";
 
 /**
  * Sidebar Component (Generic)
@@ -25,17 +28,19 @@ export const Sidebar = ({ isOpen, onClose }) => {
   const { user } = useAuth();
 
   // Generic navigation items
-  const navItems = [
-    { icon: <Home />, label: 'Home', id: 'home', link: '/' },
-    { icon: <LayoutDashboard />, label: 'Dashboard', id: 'dashboard', link: '/' },
-    { icon: <Settings />, label: 'Settings', id: 'settings', link: '#' }
-  ];
+  const navMap = {
+    ADMIN: adminNav,
+    DOCTOR: doctorNav,
+    PATIENT: patientNav,
+  };
+
+  const navItems = navMap[user?.role] ?? [];
 
   // Helper function to determine appropriate dashboard link based on role
   const getDashboardLink = () => {
-    if (user?.role === 'doctor') return '/dashboard';
-    if (user?.role === 'patient') return '/patient/dashboard';
-    if (user?.role === 'admin') return '/admin/dashboard';
+    if (user?.role === 'DOCTOR') return '/doctor/dashboard';
+    if (user?.role === 'PATIENT') return '/patient/dashboard';
+    if (user?.role === 'ADMIN') return '/admin/dashboard';
     return '/';
   };
 
@@ -56,34 +61,20 @@ export const Sidebar = ({ isOpen, onClose }) => {
         }`}
       >
         <nav className="p-4 space-y-1">
-          {navItems.map((item) => {
-            // Skip dashboard if it's the first item, we'll add a smart one
-            if (item.id === 'dashboard') {
-              return (
-                <Link
-                  key={item.id}
-                  to={getDashboardLink()}
-                  onClick={() => onClose()}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-bg-base transition-colors group text-text-primary hover:text-brand-primary text-sm"
-                >
-                  <span className="text-lg group-hover:scale-110 transition-transform">{item.icon}</span>
-                  <span className="font-medium flex-1 text-left">{item.label}</span>
-                </Link>
-              );
-            }
+          {navItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              onClick={onClose}
+              className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-bg-base transition-colors group text-text-primary hover:text-brand-primary text-sm"
+            >
+              <item.icon className="h-5 w-5 group-hover:scale-110 transition-transform" />
 
-            return (
-              <Link
-                key={item.id}
-                to={item.link}
-                onClick={() => onClose()}
-                className="w-full flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-bg-base transition-colors group text-text-primary hover:text-brand-primary text-sm"
-              >
-                <span className="text-lg group-hover:scale-110 transition-transform">{item.icon}</span>
-                <span className="font-medium flex-1 text-left">{item.label}</span>
-              </Link>
-            );
-          })}
+              <span className="font-medium flex-1 text-left">
+                {item.label}
+              </span>
+            </Link>
+          ))}
         </nav>
 
         {/* User Info */}
@@ -93,7 +84,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
             <p className="text-xs text-text-secondary mt-2">{user?.name || 'Dashboard User'}</p>
             {user?.role && (
               <p className="text-xs text-brand-primary font-medium mt-1 capitalize">
-                📋 {user.role === 'doctor' ? '👨‍⚕️ Healthcare Provider' : user.role === 'patient' ? '👤 Patient' : '⚙️ Administrator'}
+                {user.role === 'DOCTOR' ? 'Doctor' : user.role === 'PATIENT' ? 'Patient' : 'ADMIN'}
               </p>
             )}
           </div>

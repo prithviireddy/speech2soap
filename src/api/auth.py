@@ -87,7 +87,7 @@ def logout(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.post(
+@router.post( #refresh access tokem
     "/refresh",
     response_model=AccessTokenResponse,
 )

@@ -1,6 +1,6 @@
 import { useAuth } from '../../../context/AuthContext';
-import { DoctorLayout } from '../../layouts/DoctorLayout';
 import { Card, Badge, Button } from '../../shared';
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Users, FileText, Clock, AlertCircle, Plus, TrendingUp } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -72,9 +72,9 @@ export const DoctorDashboard = () => {
   };
 
   return (
-    <DoctorLayout>
+    <DashboardLayout>
       <div className="space-y-8">
-        {/* Header */}
+        {/* Header */}  
         <div className="space-y-2">
           <h1 className="text-4xl font-display font-bold">Welcome back, {user?.name || 'Doctor'}</h1>
           <p className="text-text-secondary">Today is December 15, 2024 • 5 pending reviews waiting</p>
@@ -119,20 +119,25 @@ export const DoctorDashboard = () => {
                   <Link
                     key={review.id}
                     to={`/doctor/reports/${review.id}`}
-                    className="p-4 rounded-lg border border-border-default hover:border-brand-primary hover:shadow-sm hover:bg-brand-primary/5 transition-all cursor-pointer group"
+                    className="block p-4 rounded-lg border border-border-default hover:border-brand-primary hover:bg-brand-primary/5 hover:shadow-sm transition-all group"
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
                         <p className="font-display font-bold text-text-primary group-hover:text-brand-primary transition-colors">
                           {review.patientName}
                         </p>
-                        <p className="text-xs text-text-secondary">{review.date}</p>
+                        <p className="text-xs text-text-secondary">
+                          {review.date}
+                        </p>
+                        <p className="text-sm text-text-secondary mt-2">
+                          {review.complaint}
+                        </p>
                       </div>
+
                       <Badge variant="info" size="sm">
                         {review.duration} recording
                       </Badge>
                     </div>
-                    <p className="text-sm text-text-secondary">{review.complaint}</p>
                   </Link>
                 ))}
               </div>
@@ -176,7 +181,7 @@ export const DoctorDashboard = () => {
             {/* Quick Actions */}
             <Card className="space-y-3">
               <h3 className="text-lg font-display font-bold">Quick Actions</h3>
-              <Link to="/upload">
+              <Link to="/doctor/upload">
                 <Button variant="primary" className="w-full justify-center gap-2">
                   <Plus size={18} />
                   New Consultation
@@ -232,6 +237,6 @@ export const DoctorDashboard = () => {
           </div>
         </div>
       </div>
-    </DoctorLayout>
+    </DashboardLayout>
   );
 };

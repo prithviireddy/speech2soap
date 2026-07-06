@@ -1,4 +1,4 @@
-import { PatientLayout } from '../../layouts/PatientLayout';
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Card, Badge, Button } from '../../shared';
 import { Calendar, Clock, AlertCircle } from 'lucide-react';
 
@@ -10,7 +10,7 @@ export const PatientFollowups = () => {
   ];
 
   return (
-    <PatientLayout>
+    <DashboardLayout>
       <div className="space-y-8">
         <div>
           <h1 className="text-4xl font-display font-bold">My Followups</h1>
@@ -72,6 +72,6 @@ export const PatientFollowups = () => {
           </div>
         </Card>
       </div>
-    </PatientLayout>
+    </DashboardLayout>
   );
 };

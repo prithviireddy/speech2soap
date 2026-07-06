@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PatientLayout } from '../../layouts/PatientLayout';
+import { DashboardLayout } from "../../layouts/DashboardLayout";
 import { Card, Button } from '../../shared';
 import { Lock, Bell, Eye, Download, Trash2 } from 'lucide-react';
 
@@ -7,7 +7,7 @@ export const PatientSettings = () => {
   const [activeTab, setActiveTab] = useState('account');
 
   return (
-    <PatientLayout>
+    <DashboardLayout>
       <div className="space-y-8 max-w-2xl">
         <div>
           <h1 className="text-4xl font-display font-bold">Settings</h1>
@@ -160,6 +160,6 @@ export const PatientSettings = () => {
           </div>
         )}
       </div>
-    </PatientLayout>
+    </DashboardLayout>
   );
 };

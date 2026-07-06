@@ -79,3 +79,8 @@ class AdminService:
         self.db.refresh(patient)
 
         return patient
+    
+    def list_doctors(self):
+        return self.db.scalars(
+            select(Doctor).order_by(Doctor.full_name)
+        ).all()
