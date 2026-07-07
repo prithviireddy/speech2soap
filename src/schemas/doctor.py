@@ -7,9 +7,6 @@ from .common import TimestampSchema,BaseSchema
 from .user import UserRead
 
 
-
-
-
 class DoctorRegistration(BaseSchema):
     email: EmailStr
 
@@ -59,3 +56,11 @@ class DoctorRead(TimestampSchema):
     phone: str
 
     user: UserRead
+
+class DoctorDetails(BaseSchema):
+    id: UUID
+    full_name: str
+    email: EmailStr
+    specialization: str
+    license_number: str
+    phone: str

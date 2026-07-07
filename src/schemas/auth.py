@@ -45,7 +45,7 @@ class CurrentUserResponse(BaseSchema):
     email: EmailStr
     role: UserRole
     is_active: bool
-    created_at: datetime
+    full_name: str | None
 
 
 class AccessTokenResponse(BaseSchema):

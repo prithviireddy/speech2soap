@@ -28,7 +28,6 @@ export const Navbar = ({ onMenuToggle }) => {
     { id: 2, text: 'Your session will expire soon', time: '1 hour ago', type: 'warning' },
     { id: 3, text: 'System maintenance scheduled', time: '3 hours ago', type: 'info' },
   ];
-
   return (
     <nav className="fixed top-0 left-0 w-full bg-gradient-to-b from-white/90 to-white/70 backdrop-blur-lg border-b border-border-default/40 z-40 h-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
@@ -80,13 +79,13 @@ export const Navbar = ({ onMenuToggle }) => {
               onClick={() => setShowUserMenu(!showUserMenu)}
               className="w-10 h-10 rounded-full bg-gradient-to-br from-brand-primary to-medical flex items-center justify-center text-white font-display font-bold hover:shadow-md transition-shadow"
             >
-              {user?.initial || 'U'}
+              {(user?.full_name ?? user?.email)?.charAt(0).toUpperCase()}
             </button>
 
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-border-default overflow-hidden z-50">
                 <div className="px-4 py-3 border-b border-border-default bg-bg-base">
-                  <p className="font-medium text-sm">{user?.name || 'User'}</p>
+                  <p className="font-medium text-sm">{user?.full_name ?? user?.email}</p>
                   <p className="text-xs text-text-secondary">{user?.email || 'user@example.com'}</p>
                   <p className="text-xs text-brand-primary font-medium mt-1">{user.role}</p>
                 </div>

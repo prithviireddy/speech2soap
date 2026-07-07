@@ -37,6 +37,7 @@ import { PatientSettings } from "./components/pages/patient/PatientSettings";
 // Admin Pages
 import { AdminDashboard } from "./components/pages/admin/AdminDashboard";
 import { CreateDoctor } from "./components/pages/admin/doctors/CreateDoctor";
+import { DoctorDetails } from "./components/pages/admin/doctors/DoctorDetails";
 import { DoctorsList } from "./components/pages/admin/doctors/DoctorsList";
 import { CreatePatient } from "./components/pages/admin/patients/CreatePatient";
 
@@ -216,6 +217,14 @@ const App = () => {
           }
         />
 
+        <Route
+          path="/admin/doctors/:doctorId"
+          element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <DoctorDetails />
+              </ProtectedRoute>
+          }
+        />
         <Route
           path="/admin/patients/new"
           element={<CreatePatient />}

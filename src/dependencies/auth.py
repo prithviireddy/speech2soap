@@ -1,12 +1,16 @@
 from collections.abc import Callable
 from uuid import UUID
-from jose import JWTError
+
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from src.db.session import get_db
 from src.models.user import User, UserRole
+from src.security.exceptions import (
+    InvalidAccessTokenError,
+    InvalidTokenError,
+)
 from src.security.jwt import verify_access_token
 
 security = HTTPBearer()
@@ -20,16 +24,18 @@ def get_current_user(
     token = credentials.credentials
     try:
         payload = verify_access_token(token)
-
         user_id = UUID(payload["sub"])
 
-    except (JWTError, ValueError):
+    except (
+        InvalidTokenError,
+        InvalidAccessTokenError,
+        ValueError,
+    ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication credentials",
+            detail="Invalid or expired authentication credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
     user = db.get(
         User,
         user_id,
@@ -39,7 +45,7 @@ def get_current_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found",
-        )   
+        )
 
     if not user.is_active:
         raise HTTPException(

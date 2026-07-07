@@ -1,10 +1,13 @@
+import uuid
+from typing import Sequence
+
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from src.models.doctor import Doctor
 from src.models.patient import Patient
 from src.models.user import User, UserRole
-from src.schemas.doctor import DoctorRegistration
+from src.schemas.doctor import DoctorRegistration, DoctorDetails
 from src.schemas.patient import PatientRegistration
 from src.security.password import hash_password
 from src.utils.patient_number import generate_patient_number
@@ -79,8 +82,21 @@ class AdminService:
         self.db.refresh(patient)
 
         return patient
-    
-    def list_doctors(self):
-        return self.db.scalars(
-            select(Doctor).order_by(Doctor.full_name)
-        ).all()
+
+    def list_doctors(self) -> Sequence[Doctor]:
+        return self.db.scalars(select(Doctor).order_by(Doctor.full_name)).all()
+
+    def get_doctor(self, doctor_id: uuid.UUID) -> DoctorDetails:
+        doctor = self.db.get(Doctor, doctor_id)
+
+        if doctor is None:
+            raise ValueError("Doctor not found")
+
+        return DoctorDetails(
+            id=doctor.id,
+            full_name=doctor.full_name,
+            email=doctor.user.email,
+            specialization=doctor.specialization,
+            license_number=doctor.license_number,
+            phone=doctor.phone,
+        )

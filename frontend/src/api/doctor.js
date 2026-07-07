@@ -9,3 +9,11 @@ export const getDoctorsAPI = async () => {
   const response = await api.get("/admin/doctors");
   return response.data;
 };
+
+export const getDoctorAPI = async (doctorId) => {
+  const response = await api.get(
+    `/admin/doctors/${doctorId}`
+  );
+
+  return response.data;
+};

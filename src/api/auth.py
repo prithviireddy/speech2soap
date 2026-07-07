@@ -118,6 +118,21 @@ def refresh(
     response_model=CurrentUserResponse,
 )
 def current_user(
-    user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
 ):
-    return user
+    full_name = None
+
+    if current_user.role == 'ADMIN':
+        full_name = "Administrator"
+    elif current_user.doctor_profile:
+        full_name = current_user.doctor_profile.full_name
+    elif current_user.patient_profile:
+        full_name = current_user.patient_profile.full_name
+
+    return CurrentUserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        full_name=full_name,
+        role=current_user.role,
+        is_active=current_user.is_active,
+    )
