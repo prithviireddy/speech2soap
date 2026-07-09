@@ -38,23 +38,16 @@ class DoctorRegistration(BaseSchema):
 
 class DoctorUpdate(BaseSchema):
     full_name: str | None = None
-
     specialization: str | None = None
-
     phone: str | None = None
-
+    license_number: str | None = None
 
 class DoctorRead(TimestampSchema):
     user_id: UUID
-
     full_name: str
-
     specialization: str
-
     license_number: str
-
     phone: str
-
     user: UserRead
 
 class DoctorDetails(BaseSchema):

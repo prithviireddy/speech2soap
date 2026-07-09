@@ -1,34 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MoveLeft } from 'lucide-react';
 
-import { Card, Button } from "../../../shared";
+import { DashboardLayout } from "../../../layouts/DashboardLayout";
+import { PatientForm } from "./PatientForm";
+
 import { createPatientAPI } from "../../../../api/patient";
 
 export const CreatePatient = () => {
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-    full_name: "",
-    phone: "",
-    date_of_birth: "",
-    gender: ""
-  });
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleChange = (e) => {
-    setForm((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
+  const handleCreatePatient = async (form) => {
     setLoading(true);
     setError("");
 
@@ -47,135 +32,38 @@ export const CreatePatient = () => {
   };
 
   return (
-    <AdminLayout>
-      <Card className="max-w-3xl mx-auto">
-        <h1 className="text-2xl font-semibold mb-6">
-          Create Patient
-        </h1>
+    <DashboardLayout>
+      <div className="max-w-5xl mx-auto">
 
-        {error && (
-          <div className="mb-4 rounded-lg bg-red-50 p-3 text-red-600">
-            {error}
-          </div>
-        )}
+        {/* Header */}
 
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5"
-        >
-          <div>
-            <label className="block mb-1">
-              Full Name
-            </label>
-
-            <input
-              type="text"
-              name="full_name"
-              value={form.full_name}
-              onChange={handleChange}
-              required
-              className="w-full rounded-lg border p-3"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">
-              Email
-            </label>
-
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              required
-              className="w-full rounded-lg border p-3"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">
-              Password
-            </label>
-
-            <input
-              type="password"
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              minLength={8}
-              className="w-full rounded-lg border p-3"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">
-              Phone
-            </label>
-
-            <input
-              type="text"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              required
-              className="w-full rounded-lg border p-3"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">
-              Date of Birth
-            </label>
-
-            <input
-              type="date"
-              name="date_of_birth"
-              value={form.date_of_birth}
-              onChange={handleChange}
-              required
-              className="w-full rounded-lg border p-3"
-            />
-          </div>
-
-          <div>
-            <label className="block mb-1">
-              Gender
-            </label>
-
-            <select
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-              required
-              className="w-full rounded-lg border p-3"
-            >
-              <option value="">
-                Select Gender
-              </option>
-              <option value="Male">
-                Male
-              </option>
-              <option value="Female">
-                Female
-              </option>
-              <option value="Other">
-                Other
-              </option>
-            </select>
-          </div>
-
-          <Button
-            type="submit"
-            disabled={loading}
+        <div className="mb-8">
+          <button
+            onClick={() => navigate("/admin/patients")}
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-black transition"
           >
-            {loading
-              ? "Creating..."
-              : "Create Patient"}
-          </Button>
-        </form>
-      </Card>
-    </AdminLayout>
+            <MoveLeft size={30} strokeWidth={1.5} /> Back to Patients
+          </button>
+
+          <h1 className="text-3xl font-bold mt-3">
+            Register Patient
+          </h1>
+
+          <p className="text-gray-500 mt-2">
+            Register a new patient in the clinic.
+          </p>
+        </div>
+
+        <PatientForm
+          mode="create"
+          onSubmit={handleCreatePatient}
+          loading={loading}
+          error={error}
+          submitLabel="Register Patient"
+          onCancel={() => navigate("/admin/patients")}
+        />
+
+      </div>
+    </DashboardLayout>
   );
 };

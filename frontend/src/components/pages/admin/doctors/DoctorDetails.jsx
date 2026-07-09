@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { MoveLeft } from 'lucide-react';
 
 import { DashboardLayout } from "../../../layouts/DashboardLayout";
 import { Card, Button } from "../../../shared";
@@ -79,9 +80,9 @@ export const DoctorDetails = () => {
         <div className="mb-8">
           <button
             onClick={() => navigate("/admin/doctors")}
-            className="text-sm text-gray-500 hover:text-black transition"
+            className="flex items-center gap-2 text-sm text-gray-500 hover:text-black transition"
           >
-            ← Back to Doctors
+            <MoveLeft size={30} strokeWidth={1.5} /> Back to Doctors
           </button>
 
           <h1 className="text-3xl font-bold mt-3">

@@ -17,3 +17,14 @@ export const getDoctorAPI = async (doctorId) => {
 
   return response.data;
 };
+
+
+export const updateDoctorAPI = async(doctorId,payload) => {
+  const response = await api.patch(
+    `/admin/doctors/${doctorId}`,
+    payload
+  );
+
+  return response.data;
+};
+

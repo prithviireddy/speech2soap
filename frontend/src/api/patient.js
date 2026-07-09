@@ -8,3 +8,29 @@ export const createPatientAPI = async (payload) => {
 
   return response.data;
 };
+
+export const getPatientsAPI = async () => {
+  const response = await api.get(
+    "/admin/patients"
+  );
+
+  return response.data;
+};
+
+
+export const getPatientAPI = async (patientId) => {
+  const response = await api.get(
+    `/admin/patients/${patientId}`
+  );
+
+  return response.data;
+};
+
+export const updatePatientAPI = async (patientId, payload) => {
+  const response = await api.patch(
+    `/admin/patients/${patientId}`,
+    payload
+  );
+
+  return response.data;
+};

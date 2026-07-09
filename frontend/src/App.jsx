@@ -39,7 +39,11 @@ import { AdminDashboard } from "./components/pages/admin/AdminDashboard";
 import { CreateDoctor } from "./components/pages/admin/doctors/CreateDoctor";
 import { DoctorDetails } from "./components/pages/admin/doctors/DoctorDetails";
 import { DoctorsList } from "./components/pages/admin/doctors/DoctorsList";
+import { EditDoctor } from "./components/pages/admin/doctors/EditDoctor";
 import { CreatePatient } from "./components/pages/admin/patients/CreatePatient";
+import { PatientList } from "./components/pages/admin/patients/PatientList";
+import { PatientDetails } from "./components/pages/admin/patients/PatientDetails";
+import { EditPatient } from "./components/pages/admin/patients/EditPatient";
 
 const App = () => {
   const {
@@ -225,10 +229,52 @@ const App = () => {
               </ProtectedRoute>
           }
         />
+
+        <Route
+          path = "/admin/doctors/:doctorId/edit"
+          element = {
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <EditDoctor/>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/patients"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <PatientList />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/admin/patients/new"
-          element={<CreatePatient />}
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+                <CreatePatient />
+              </ProtectedRoute>
+            }
         />
+
+        <Route
+          path="/admin/patients/:patientId"
+          element={
+              <ProtectedRoute allowedRoles={["ADMIN"]}>
+                  <PatientDetails />
+              </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin/patients/:patientId/edit"
+          element={
+            <ProtectedRoute allowedRoles={["ADMIN"]}>
+              <EditPatient />
+            </ProtectedRoute>
+          }
+        />
+
 
 
         {/*DEFAULT ROUTING*/}
