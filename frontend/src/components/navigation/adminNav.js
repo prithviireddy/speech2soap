@@ -2,7 +2,8 @@ import {
     Home,
     Users,
     UserPlus,
-    UsersRound
+    UsersRound,
+    ClipboardPlus
 } from "lucide-react";
 
 export const adminNav = [
@@ -23,5 +24,13 @@ export const adminNav = [
         label: "Patients",
         icon: UsersRound,
         path: "/admin/patients"
+    },
+    {
+        id:"appointments",
+        label: "Appointments",
+        icon: ClipboardPlus,
+        path: "/admin/appointments"
     }
+
+
 ];

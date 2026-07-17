@@ -19,31 +19,17 @@ import { useAuth } from "./context/AuthContext";
 import { LoginPage } from "./components/pages/LoginPage";
 
 // Doctor Pages
-import { DoctorDashboard } from "./components/pages/doctor/DoctorDashboard";
-import { ConsultationUploadPage } from "./components/pages/doctor/ConsultationUploadPage";
-import { DoctorReportReview } from "./components/pages/doctor/DoctorReportReview";
-import { DoctorPatientManagement } from "./components/pages/doctor/DoctorPatientManagement";
-import { DoctorFollowupManagement } from "./components/pages/doctor/DoctorFollowupManagement";
-import { DoctorAIAssistant } from "./components/pages/doctor/DoctorAIAssistant";
+import { DoctorDashboard,ConsultationUploadPage, DoctorReportReview, DoctorPatientManagement, DoctorFollowupManagement, DoctorAIAssistant} from "./components/pages/doctor";
+
 
 // Patient Pages
-import { PatientDashboard } from "./components/pages/patient/PatientDashboard";
-import { PatientReportViewer } from "./components/pages/patient/PatientReportViewer";
-import { PatientMedications } from "./components/pages/patient/PatientMedications";
-import { PatientFollowups } from "./components/pages/patient/PatientFollowups";
-import { PatientAIAssistant } from "./components/pages/patient/PatientAIAssistant";
-import { PatientSettings } from "./components/pages/patient/PatientSettings";
+import { PatientDashboard, PatientReportViewer, PatientMedications, PatientFollowups, PatientAIAssistant, PatientSettings } from "./components/pages/patient";
 
 // Admin Pages
 import { AdminDashboard } from "./components/pages/admin/AdminDashboard";
-import { CreateDoctor } from "./components/pages/admin/doctors/CreateDoctor";
-import { DoctorDetails } from "./components/pages/admin/doctors/DoctorDetails";
-import { DoctorsList } from "./components/pages/admin/doctors/DoctorsList";
-import { EditDoctor } from "./components/pages/admin/doctors/EditDoctor";
-import { CreatePatient } from "./components/pages/admin/patients/CreatePatient";
-import { PatientList } from "./components/pages/admin/patients/PatientList";
-import { PatientDetails } from "./components/pages/admin/patients/PatientDetails";
-import { EditPatient } from "./components/pages/admin/patients/EditPatient";
+import { CreateDoctor, EditDoctor, DoctorDetails, DoctorsList } from "./components/pages/admin/doctors";
+import { CreatePatient, PatientList, PatientDetails, EditPatient } from "./components/pages/admin/patients";
+import { AppointmentDetails, AppointmentList, EditAppointment, CreateAppointment } from "./components/pages/admin/appointments";
 
 const App = () => {
   const {
@@ -275,6 +261,41 @@ const App = () => {
           }
         />
 
+        <Route 
+          path="/admin/appointments"
+          element={
+            <ProtectedRoute allowedRoles = {["ADMIN"]}>
+              <AppointmentList />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route 
+          path = "/admin/appointments/new"
+          element={
+            <ProtectedRoute allowedRoles = {["ADMIN"]}>
+              <CreateAppointment />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route 
+          path = "/admin/appointments/:appointmentId"
+          element={
+            <ProtectedRoute allowedRoles = {["ADMIN"]}>
+              <AppointmentDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route 
+          path = "/admin/appointments/:appointmentId/edit"
+          element={
+            <ProtectedRoute allowedRoles = {["ADMIN"]}>
+              <EditAppointment />
+            </ProtectedRoute>
+          }
+        />
 
 
         {/*DEFAULT ROUTING*/}

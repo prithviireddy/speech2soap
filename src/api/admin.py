@@ -197,6 +197,8 @@ def list_appointments(db: Session = Depends(get_db)) -> Sequence[Appointment]:
     service = AdminService(db)
     return service.list_appointments()
 
+
+
 @router.get(
     "/appointments/{appointment_id}",
     response_model=AppointmentRead

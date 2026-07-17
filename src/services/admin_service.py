@@ -1,9 +1,13 @@
 import uuid
 from datetime import datetime, timedelta
 from typing import Sequence
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
+
+
+
 
 from src.models.appointment import Appointment, AppointmentStatus
 from src.models.doctor import Doctor
@@ -19,6 +23,7 @@ from src.schemas.patient import PatientDetails, PatientRegistration, PatientUpda
 from src.security.password import hash_password
 from src.utils.patient_number import generate_patient_number
 
+INDIA_TZ = ZoneInfo("Asia/Kolkata")
 
 class AdminService:
     def __init__(self, db: Session):
@@ -55,11 +60,9 @@ class AdminService:
         self.db.refresh(doctor)
 
         return doctor
-    
 
     def list_doctors(self) -> Sequence[Doctor]:
         return self.db.scalars(select(Doctor).order_by(Doctor.full_name)).all()
-
 
     def get_doctor(self, doctor_id: uuid.UUID) -> DoctorDetails:
         doctor = self.db.get(Doctor, doctor_id)
@@ -67,8 +70,14 @@ class AdminService:
         if doctor is None:
             raise ValueError("Doctor not found")
 
-        return DoctorDetails.model_validate(doctor)
-
+        return DoctorDetails(
+            id=doctor.id,
+            full_name=doctor.full_name,
+            email=doctor.user.email,
+            specialization=doctor.specialization,
+            license_number=doctor.license_number,
+            phone=doctor.phone,
+        )
 
     def update_doctor(self, doctor_id: uuid.UUID, payload: DoctorUpdate) -> Doctor:
         doctor = self.db.get(Doctor, doctor_id)
@@ -85,7 +94,6 @@ class AdminService:
         self.db.refresh(doctor)
 
         return doctor
-
 
     def create_patient(self, payload: PatientRegistration) -> Patient:
 
@@ -121,10 +129,8 @@ class AdminService:
 
         return patient
 
-
     def list_patients(self) -> Sequence[Patient]:
         return self.db.scalars(select(Patient).order_by(Patient.full_name)).all()
-
 
     def get_patient(self, patient_id: uuid.UUID) -> PatientDetails:
 
@@ -133,8 +139,15 @@ class AdminService:
         if patient is None:
             raise ValueError("Patient not found")
 
-        return PatientDetails.model_validate(patient)
-
+        return PatientDetails(
+            id=patient.id,
+            patient_number=patient.patient_number,
+            full_name=patient.full_name,
+            email=patient.user.email if patient.user else None,
+            phone=patient.phone,
+            date_of_birth=patient.date_of_birth,
+            gender=patient.gender,
+        )
 
     def update_patient(self, patient_id: uuid.UUID, payload: PatientUpdate) -> Patient:
         patient = self.db.get(Patient, patient_id)
@@ -152,9 +165,11 @@ class AdminService:
 
         return patient
 
-
-
     def create_appointment(self, payload: AppointmentCreate) -> Appointment:
+        if payload.scheduled_at.tzinfo is None:
+            payload.scheduled_at = payload.scheduled_at.replace(
+                tzinfo=INDIA_TZ
+            )
         patient = self.db.get(Patient, payload.patient_id)
         doctor = self.db.get(Doctor, payload.doctor_id)
 
@@ -178,7 +193,7 @@ class AdminService:
             duration_minutes=payload.duration_minutes,
             status=AppointmentStatus.SCHEDULED,
             reason=payload.reason,
-            notes=payload.notes
+            notes=payload.notes,
         )
 
         self.db.add(appointment)
@@ -191,8 +206,6 @@ class AdminService:
         return self.db.scalars(
             select(Appointment).order_by(Appointment.scheduled_at.desc())
         ).all()
-    
-
 
     def get_appointment(self, appointment_id: uuid.UUID) -> Appointment:
         appointment = self.db.get(Appointment, appointment_id)
@@ -201,11 +214,17 @@ class AdminService:
             raise ValueError("Appointment not found")
 
         return appointment
-    
 
     def update_appointment(
         self, appointment_id: uuid.UUID, payload: AppointmentUpdate
     ) -> Appointment:
+        if (
+            payload.scheduled_at is not None
+            and payload.scheduled_at.tzinfo is None
+        ):
+            payload.scheduled_at = payload.scheduled_at.replace(
+                tzinfo=INDIA_TZ
+            )
         appointment = self.db.get(Appointment, appointment_id)
         if appointment is None:
             raise ValueError("Appointment not found")
@@ -238,37 +257,36 @@ class AdminService:
         self.db.refresh(appointment)
 
         return appointment
-    
-
 
     def patient_lookup(self, search: str) -> Sequence[Patient]:
         search_term = f"%{search}%"
         return self.db.scalars(
-            select(Patient).where(
+            select(Patient)
+            .where(
                 or_(
                     Patient.patient_number.ilike(search_term),
                     Patient.full_name.ilike(search_term),
                     Patient.phone.ilike(search_term),
                 )
-            ).order_by(Patient.full_name).limit(10)
-
+            )
+            .order_by(Patient.full_name)
+            .limit(10)
         ).all()
-
-
 
     def doctor_lookup(self, search: str) -> Sequence[Doctor]:
         search_term = f"%{search}%"
         return self.db.scalars(
-            select(Doctor).where(
+            select(Doctor)
+            .where(
                 or_(
                     Doctor.full_name.ilike(search_term),
                     Doctor.specialization.ilike(search_term),
                     Doctor.license_number.ilike(search_term),
                 )
-            ).order_by(Doctor.full_name).limit(10)
+            )
+            .order_by(Doctor.full_name)
+            .limit(10)
         ).all()
-
-
 
     def _has_appointment_conflict(
         self,
