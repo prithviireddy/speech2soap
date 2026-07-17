@@ -17,6 +17,14 @@ export const getPatientsAPI = async () => {
   return response.data;
 };
 
+export const lookupPatients = async (search) => {
+  const response = await api.get(`/admin/patient/lookup`,{
+    params: {
+      search,
+    },
+  });
+  return response.data;
+}
 
 export const getPatientAPI = async (patientId) => {
   const response = await api.get(

@@ -18,6 +18,15 @@ export const getDoctorAPI = async (doctorId) => {
   return response.data;
 };
 
+export const lookupDoctors = async (search) => {
+  const response = await api.get(`/admin/doctors/lookup`,{
+    params: {
+      search,
+    },
+  });
+  return response.data;
+}
+
 
 export const updateDoctorAPI = async(doctorId,payload) => {
   const response = await api.patch(

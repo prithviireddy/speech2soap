@@ -72,3 +72,8 @@ class Patient(Base, UUIDMixin, TimestampMixin):
         "Appointment",
         back_populates="patient",
     )
+
+
+    @property
+    def email(self):
+        return self.user.email if self.user else None

@@ -42,6 +42,11 @@ class Appointment(Base, UUIDMixin, TimestampMixin):
         nullable=False,
         index=True,
     )
+
+    duration_minutes: Mapped[int] = mapped_column(
+        nullable=False,
+        index = True
+    )
  
     status: Mapped[AppointmentStatus] = mapped_column(
         SQLEnum(AppointmentStatus),
@@ -75,3 +80,13 @@ class Appointment(Base, UUIDMixin, TimestampMixin):
         back_populates="appointment",
         uselist=False,
     )
+
+    @property
+    def doctor_name(self) -> str:
+        return self.doctor.full_name
+    
+    @property
+    def patient_name(self):
+        return self.patient.full_name
+    
+    
