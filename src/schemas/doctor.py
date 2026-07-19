@@ -1,9 +1,10 @@
+from datetime import datetime
 from uuid import UUID
 
-from pydantic import EmailStr
-from pydantic import Field
+from pydantic import EmailStr, Field
 
-from .common import TimestampSchema,BaseSchema
+from .appointment import AppointmentStatus
+from .common import BaseSchema, TimestampSchema
 from .user import UserRead
 
 
@@ -42,6 +43,7 @@ class DoctorUpdate(BaseSchema):
     phone: str | None = None
     license_number: str | None = None
 
+
 class DoctorRead(TimestampSchema):
     user_id: UUID
     full_name: str
@@ -50,6 +52,7 @@ class DoctorRead(TimestampSchema):
     phone: str
     user: UserRead
 
+
 class DoctorDetails(BaseSchema):
     id: UUID
     full_name: str
@@ -57,3 +60,34 @@ class DoctorDetails(BaseSchema):
     specialization: str
     license_number: str
     phone: str
+
+
+class DoctorAppointmentListItem(BaseSchema):
+    id: UUID
+
+    patient_name: str
+
+    scheduled_at: datetime
+
+    status: AppointmentStatus
+
+    reason: str | None = None
+
+
+class DoctorAppointmentDetails(TimestampSchema):
+    id: UUID
+
+    patient_name: str
+
+    scheduled_at: datetime
+
+    duration_minutes: int = Field(
+        gt=0,
+        le=120,
+    )
+
+    status: AppointmentStatus
+
+    reason: str | None = None
+
+    notes: str | None = None

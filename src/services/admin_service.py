@@ -6,16 +6,12 @@ from zoneinfo import ZoneInfo
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
-
-
-
 from src.models.appointment import Appointment, AppointmentStatus
 from src.models.doctor import Doctor
 from src.models.patient import Patient
 from src.models.user import User, UserRole
 from src.schemas.appointment import (
     AppointmentCreate,
-    AppointmentRead,
     AppointmentUpdate,
 )
 from src.schemas.doctor import DoctorDetails, DoctorRegistration, DoctorUpdate
