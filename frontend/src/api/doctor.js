@@ -37,3 +37,19 @@ export const updateDoctorAPI = async(doctorId,payload) => {
   return response.data;
 };
 
+
+export const listDoctorAppointmentsAPI = async () => {
+  const response = await api.get("/doctor/appointments");
+  return response.data;
+};
+
+
+export const getDoctorAppointmentAPI = async (appointmentId) => {
+  const response = await api.get(
+    `/doctor/appointments/${appointmentId}`
+  );
+
+  return response.data;
+};
+
+

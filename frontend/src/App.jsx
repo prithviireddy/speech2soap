@@ -19,7 +19,7 @@ import { useAuth } from "./context/AuthContext";
 import { LoginPage } from "./components";
 
 // Doctor Pages
-import { DoctorDashboard,ConsultationUploadPage, DoctorReportReview, DoctorAIAssistant} from "./components";
+import { DoctorDashboard,ConsultationUploadPage, DoctorReportReview, DoctorAIAssistant, DoctorAppointments, DoctorAppointmentDetails} from "./components";
 
 // Patient Pages
 import { PatientDashboard, PatientReportViewer, PatientMedications, PatientFollowups, PatientAIAssistant, PatientSettings } from "./components";
@@ -75,10 +75,55 @@ const App = () => {
         />
 
         <Route
-          path="/doctor/upload"
+          path="/doctor/appointments"
+          element={
+            <ProtectedRoute allowedRoles={["DOCTOR"]}>
+              <DoctorAppointments />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/doctor/appointments/:appointmentId"
+          element={
+            <ProtectedRoute allowedRoles={["DOCTOR"]}>
+              <DoctorAppointmentDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* <Route
+          path="/doctor/consultations/new/:appointmentId"
           element={
             <ProtectedRoute allowedRoles={["DOCTOR"]}>
               <ConsultationUploadPage />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/doctor/consultations"
+          element={
+            <ProtectedRoute allowedRoles={["DOCTOR"]}>
+              <DoctorConsultations />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/doctor/consultations/:consultationId"
+          element={
+            <ProtectedRoute allowedRoles={["DOCTOR"]}>
+              <ConsultationDetails />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/doctor/reports"
+          element={
+            <ProtectedRoute allowedRoles={["DOCTOR"]}>
+              <DoctorReports />
             </ProtectedRoute>
           }
         />
@@ -99,7 +144,7 @@ const App = () => {
               <DoctorAIAssistant />
             </ProtectedRoute>
           }
-        />
+        /> */}
 
         {/*PATIENT ROUTES*/}
 
