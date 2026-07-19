@@ -31,6 +31,4 @@ export const adminNav = [
         icon: ClipboardPlus,
         path: "/admin/appointments"
     }
-
-
 ];

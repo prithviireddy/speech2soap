@@ -7,9 +7,7 @@ import {
   Home
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { adminNav } from "../navigation/adminNav";
-import { doctorNav } from "../navigation/doctorNav";
-import { patientNav } from "../navigation/patientNav";
+import { adminNav,patientNav,doctorNav } from "../navigation";
 
 /**
  * Sidebar Component (Generic)

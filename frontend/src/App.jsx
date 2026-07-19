@@ -16,20 +16,17 @@ import {
 import { useAuth } from "./context/AuthContext";
 
 // Auth Pages
-import { LoginPage } from "./components/pages/LoginPage";
+import { LoginPage } from "./components";
 
 // Doctor Pages
-import { DoctorDashboard,ConsultationUploadPage, DoctorReportReview, DoctorPatientManagement, DoctorFollowupManagement, DoctorAIAssistant} from "./components/pages/doctor";
-
+import { DoctorDashboard,ConsultationUploadPage, DoctorReportReview, DoctorAIAssistant} from "./components";
 
 // Patient Pages
-import { PatientDashboard, PatientReportViewer, PatientMedications, PatientFollowups, PatientAIAssistant, PatientSettings } from "./components/pages/patient";
+import { PatientDashboard, PatientReportViewer, PatientMedications, PatientFollowups, PatientAIAssistant, PatientSettings } from "./components";
 
 // Admin Pages
-import { AdminDashboard } from "./components/pages/admin/AdminDashboard";
-import { CreateDoctor, EditDoctor, DoctorDetails, DoctorsList } from "./components/pages/admin/doctors";
-import { CreatePatient, PatientList, PatientDetails, EditPatient } from "./components/pages/admin/patients";
-import { AppointmentDetails, AppointmentList, EditAppointment, CreateAppointment } from "./components/pages/admin/appointments";
+import { AdminDashboard, CreateDoctor, EditDoctor, DoctorDetails, DoctorsList, CreatePatient, PatientList, PatientDetails, EditPatient,  AppointmentDetails, AppointmentList, EditAppointment, CreateAppointment } from "./components";
+
 
 const App = () => {
   const {
@@ -91,24 +88,6 @@ const App = () => {
           element={
             <ProtectedRoute allowedRoles={["DOCTOR"]}>
               <DoctorReportReview />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/doctor/patients"
-          element={
-            <ProtectedRoute allowedRoles={["DOCTOR"]}>
-              <DoctorPatientManagement />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/doctor/followups"
-          element={
-            <ProtectedRoute allowedRoles={["DOCTOR"]}>
-              <DoctorFollowupManagement />
             </ProtectedRoute>
           }
         />
