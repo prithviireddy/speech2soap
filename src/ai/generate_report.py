@@ -145,16 +145,7 @@ Conversation:
     # Parse JSON
     clinical_output = json.loads(raw_text)
 
-    # Output path
-    output_path = OUTPUT_DIR / f"{transcript_path.stem}.json"
-
-    # Save report
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(clinical_output, f, indent=2, ensure_ascii=False)
-
-    print(f"Saved -> {output_path}")
-
     # Optional rate limit safety
-    time.sleep(1)
+    # time.sleep(1)
 
-    return output_path
+    return clinical_output

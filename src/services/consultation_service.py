@@ -1,12 +1,13 @@
-import json
+import traceback
 
 from src.db.session import SessionLocal
+from src.models.appointment import AppointmentStatus
 from src.models.consultation import Consultation, ConsultationStatus
 from src.models.report import Report
 from src.utils.consultation_progress import update_progress
 
-from ..ai.merge_dialogue import merge_dialogue
 from ..ai.generate_report import generate_clinical_report
+from ..ai.merge_dialogue import merge_dialogue
 from ..ai.speaker_diarization import transcribe_audio
 
 
@@ -44,10 +45,7 @@ class ConsultationService:
                 "Generating Clinical Report",
             )
 
-            report_path = generate_clinical_report(merged_path)
-
-            with open(report_path, "r", encoding="utf-8") as f:
-                report = json.load(f)
+            report = generate_clinical_report(merged_path)
 
             report_record = Report(
                 consultation_id=consultation_id,
@@ -62,19 +60,37 @@ class ConsultationService:
                 consultation_id,
             )
 
+            if consultation is None:
+                raise ValueError("Consultation not found.")
+            
+            appointment = consultation.appointment
+
             consultation.progress = 100
             consultation.current_stage = "Completed"
             consultation.status = ConsultationStatus.REVIEW_PENDING
+            
+            appointment.status = AppointmentStatus.COMPLETED
             db.commit()
 
         except Exception as e:
+            print("\n")
+            print("=" * 50)
+            print("CONSULTATION PROCESSING FAILED")
+            traceback.print_exc()
+            print("=" * 50)
+            print("\n")
+
             consultation = db.get(
                 Consultation,
                 consultation_id,
             )
 
-            consultation.status = ConsultationStatus.FAILED
-            db.commit()
+            if consultation is not None:
+                consultation.status = ConsultationStatus.FAILED
+                consultation.progress = 0
+                consultation.current_stage = "Failed"
+
+                db.commit()
 
         finally:
             db.close()

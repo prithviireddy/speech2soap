@@ -4,16 +4,7 @@ from enum import Enum
 from pydantic import Field
 
 from .common import TimestampSchema,BaseSchema
-
-
-class ConsultationStatus(str, Enum):
-    UPLOADED = "UPLOADED"
-    TRANSCRIBING = "TRANSCRIBING"
-    PROCESSING = "PROCESSING"
-    REVIEW_PENDING = "REVIEW_PENDING"
-    APPROVED = "APPROVED"
-    FAILED = "FAILED"
-
+from src.models.consultation import ConsultationStatus
 
 class ConsultationCreate(BaseSchema):
     appointment_id: UUID
@@ -23,7 +14,6 @@ class ConsultationCreate(BaseSchema):
 
 class ConsultationUpdate(BaseSchema):
     status: ConsultationStatus | None = None
-
     progress: int | None = Field(
         default=None,
         ge=0,
@@ -33,21 +23,14 @@ class ConsultationUpdate(BaseSchema):
 
 class ConsultationRead(TimestampSchema):
     doctor_id: UUID
-
     patient_id: UUID
-
     audio_file_path: str
-
     duration_seconds: int | None
-
     progress: int
-
     status: ConsultationStatus
 
 
 class ConsultationListItem(TimestampSchema):
     patient_id: UUID
-
     progress: int
-
     status: ConsultationStatus

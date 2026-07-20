@@ -58,9 +58,9 @@ class Consultation(Base, UUIDMixin, TimestampMixin):
         nullable=False,
     )
 
-    current_stage: Mapped[str | None] = mapped_column(
+    current_stage: Mapped[str] = mapped_column(
         String,
-        nullable=True,
+        nullable=False,
     )
 
     status: Mapped[ConsultationStatus] = mapped_column(
