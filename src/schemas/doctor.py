@@ -106,3 +106,22 @@ class DoctorConsultationStatusRead(BaseSchema):
     progress: int
     current_stage: str
     report_id: UUID | None = None
+
+class DoctorReportListItem(TimestampSchema):
+
+    id: UUID
+    patient_name: str
+    is_approved: bool
+
+
+class DoctorReportRead(TimestampSchema):
+
+    id: UUID
+    consultation_id: UUID
+    is_approved: bool
+    report_json: dict
+
+
+class DoctorReportUpdate(BaseSchema):
+
+    report_json: dict

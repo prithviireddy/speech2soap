@@ -21,6 +21,9 @@ from src.schemas.doctor import (
     DoctorConsultationListItem,
     DoctorConsultationRead,
     DoctorConsultationStatusRead,
+    DoctorReportListItem,
+    DoctorReportRead,
+    DoctorReportUpdate,
 )
 from src.services.consultation_service import ConsultationService
 from src.services.doctor_service import DoctorService
@@ -217,6 +220,126 @@ def get_consultation_status(
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        )
+
+
+@router.get(
+    "/reports",
+    response_model=list[DoctorReportListItem],
+)
+def list_reports(
+    current_user: User = Depends(get_current_doctor),
+    db: Session = Depends(get_db),
+):
+
+    service = DoctorService(db)
+
+    try:
+        return service.list_reports(
+            current_user.doctor_profile.id,
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+
+
+@router.get(
+    "/reports/{report_id}",
+    response_model=DoctorReportRead,
+)
+def get_report(
+    report_id: uuid.UUID,
+    current_user: User = Depends(get_current_doctor),
+    db: Session = Depends(get_db),
+):
+
+    service = DoctorService(db)
+
+    try:
+        return service.get_report(
+            current_user.doctor_profile.id,
+            report_id,
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        )
+
+
+@router.patch(
+    "/reports/{report_id}",
+    response_model=DoctorReportRead,
+)
+def update_report(
+    report_id: uuid.UUID,
+    payload: DoctorReportUpdate,
+    current_user: User = Depends(get_current_doctor),
+    db: Session = Depends(get_db),
+):
+
+    service = DoctorService(db)
+
+    try:
+        return service.update_report(
+            current_user.doctor_profile.id,
+            report_id,
+            payload,
+        )
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(exc),
+        )
+
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        )
+
+
+@router.post(
+    "/reports/{report_id}/approve",
+    status_code=status.HTTP_200_OK,
+)
+def approve_report(
+    report_id: uuid.UUID,
+    current_user: User = Depends(get_current_doctor),
+    db: Session = Depends(get_db),
+):
+
+    service = DoctorService(db)
+
+    try:
+        service.approve_report(
+            current_user.doctor_profile.id,
+            report_id,
+        )
+
+        return {"message": "Report approved successfully."}
+
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(exc),
         )
 

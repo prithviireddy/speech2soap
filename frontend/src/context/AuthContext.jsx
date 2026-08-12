@@ -19,10 +19,10 @@ export const useAuth = () => {
 const logAudit = (action, details) => {
   const timestamp = new Date().toISOString();
 
-  console.log(
-    `[AUDIT ${timestamp}] ${action}:`,
-    details
-  );
+  // console.log(
+  //   `[AUDIT ${timestamp}] ${action}:`,
+  //   details
+  // );
 };    
 
 export const AuthProvider = ({ children }) => {

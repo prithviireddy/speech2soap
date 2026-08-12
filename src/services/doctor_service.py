@@ -8,12 +8,16 @@ from sqlalchemy.orm import Session
 
 from src.models.appointment import Appointment, AppointmentStatus
 from src.models.consultation import Consultation, ConsultationStatus
+from src.models.report import Report
 from src.schemas.doctor import (
     DoctorAppointmentDetails,
     DoctorAppointmentListItem,
     DoctorConsultationListItem,
     DoctorConsultationRead,
     DoctorConsultationStatusRead,
+    DoctorReportListItem,
+    DoctorReportRead,
+    DoctorReportUpdate,
 )
 
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
@@ -214,3 +218,122 @@ class DoctorService:
             current_stage=consultation.current_stage,
             report_id=report_id,
         )
+
+    def list_reports(
+        self,
+        doctor_id: uuid.UUID,
+    ) -> list[DoctorReportListItem]:
+
+        reports = (
+            self.db.execute(
+                select(Report)
+                .join(Report.consultation)
+                .where(
+                    Consultation.doctor_id == doctor_id,
+                )
+                .order_by(
+                    Report.created_at.desc(),
+                )
+            )
+            .scalars()
+            .all()
+        )
+
+        return [
+            DoctorReportListItem(
+                id=report.id,
+                patient_name=report.consultation.patient.full_name,
+                is_approved=report.is_approved,
+                created_at=report.created_at,
+                updated_at=report.updated_at,
+            )
+            for report in reports
+        ]
+
+    def get_report(
+        self,
+        doctor_id: uuid.UUID,
+        report_id: uuid.UUID,
+    ) -> DoctorReportRead:
+
+        report = self.db.get(
+            Report,
+            report_id,
+        )
+
+        if report is None:
+            raise ValueError("Report not found.")
+
+        if report.consultation.doctor_id != doctor_id:
+            raise PermissionError("You are not authorized to access this report.")
+
+        return DoctorReportRead(
+            id=report.id,
+            consultation_id=report.consultation_id,
+            is_approved=report.is_approved,
+            report_json=report.report_json,
+            created_at=report.created_at,
+            updated_at=report.updated_at,
+        )
+
+    def update_report(
+        self,
+        doctor_id: uuid.UUID,
+        report_id: uuid.UUID,
+        payload: DoctorReportUpdate,
+    ) -> DoctorReportRead:
+
+        report = self.db.get(
+            Report,
+            report_id,
+        )
+
+        if report is None:
+            raise ValueError("Report not found.")
+
+        if report.consultation.doctor_id != doctor_id:
+            raise PermissionError("You are not authorized to update this report.")
+
+        if report.is_approved:
+            raise ValueError("Approved reports cannot be modified.")
+
+        report.report_json = payload.report_json
+
+        self.db.commit()
+        self.db.refresh(report)
+
+        return DoctorReportRead(
+            id=report.id,
+            consultation_id=report.consultation_id,
+            is_approved=report.is_approved,
+            report_json=report.report_json,
+            created_at=report.created_at,
+            updated_at=report.updated_at,
+        )
+
+    def approve_report(
+        self,
+        doctor_id: uuid.UUID,
+        report_id: uuid.UUID,
+    ) -> None:
+
+        report = self.db.get(
+            Report,
+            report_id,
+        )
+
+        if report is None:
+            raise ValueError("Report not found.")
+
+        if report.consultation.doctor_id != doctor_id:
+            raise PermissionError("You are not authorized to approve this report.")
+
+        if report.is_approved:
+            raise ValueError("Report is already approved.")
+
+        report.is_approved = True
+
+        report.consultation.status = ConsultationStatus.APPROVED
+
+        self.db.commit()
+
