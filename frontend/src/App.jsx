@@ -171,21 +171,12 @@ const App = () => {
         />
 
         <Route
-          path="/patient/medications"
+          path="/patient/reports/:reportId"
           element={
-            <ProtectedRoute allowedRoles={["PATIENT"]}>
-              <PatientMedications />
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/patient/followups"
-          element={
-            <ProtectedRoute allowedRoles={["PATIENT"]}>
-              <PatientFollowups />
-            </ProtectedRoute>
-          }
+              <ProtectedRoute allowedRoles={["PATIENT"]}>
+                <PatientReportViewer />
+              </ProtectedRoute>
+            }
         />
 
         <Route

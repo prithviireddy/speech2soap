@@ -22,7 +22,7 @@ class ReportRead(TimestampSchema):
     transcript_json: dict[str, Any] | None
 
 
-class ReportSummary(BaseSchema):
+class ReportSummary(TimestampSchema):
     id: UUID
 
     consultation_id: UUID

@@ -42,3 +42,23 @@ export const updatePatientAPI = async (patientId, payload) => {
 
   return response.data;
 };
+
+export const getPatientProfile = async () => {
+  const response = await api.get("/patient/me");
+  return response.data;
+};
+
+export const updatePatientProfile = async (data) => {
+  const response = await api.patch("/patient/me", data);
+  return response.data;
+};
+
+export const getPatientReports = async () => {
+  const response = await api.get("/patient/reports");
+  return response.data;
+};
+
+export const getPatientReport = async (reportId) => {
+  const response = await api.get(`/patient/reports/${reportId}`);
+  return response.data;
+};
