@@ -11,13 +11,16 @@ export const DashboardLayout = ({ children }) => {
       <div className="absolute top-0 left-0 right-0 h-96 bg-radial-aura pointer-events-none z-0" />
 
       {/* Top Fixed Navigation */}
-      <Navbar onMenuToggle={() => setMenuOpen(!menuOpen)} />
+      <Navbar
+        onToggleSidebar={() => setMenuOpen(!menuOpen)}
+        isSidebarOpen={menuOpen}
+      />
 
       {/* Left Sidebar Navigation */}
       <Sidebar isOpen={menuOpen} onClose={() => setMenuOpen(false)} />
 
-      {/* Main Page Content */}
-      <main className="relative z-10 md:ml-64 pt-20 px-4 pb-8 sm:px-6 lg:px-8">
+      {/* Main Page Content — Clean compact gap below sticky Navbar */}
+      <main className="relative z-10 md:ml-64 pt-6 px-4 pb-8 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {children}
         </div>

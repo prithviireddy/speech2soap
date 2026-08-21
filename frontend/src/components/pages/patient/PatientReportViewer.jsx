@@ -35,6 +35,38 @@ const EmptyField = () => (
 );
 
 
+const formatMedication = (m) => {
+  if (!m) return "";
+  if (typeof m === "string") return m;
+  const parts = [
+    m.name || m.medication,
+    m.dosage,
+    m.frequency,
+    m.duration ? `for ${m.duration}` : null,
+  ].filter(Boolean);
+  return parts.join(" - ") || JSON.stringify(m);
+};
+
+const formatDiagnosis = (d) => {
+  if (!d) return "";
+  if (typeof d === "string") return d;
+  if (d.name) {
+    return d.icd_code ? `${d.name} (${d.icd_code})` : d.name;
+  }
+  return typeof d === "object" ? JSON.stringify(d) : String(d);
+};
+
+const formatItem = (item) => {
+  if (item == null) return "";
+  if (typeof item === "string") return item;
+  if (typeof item === "object") {
+    if (item.dosage || item.frequency) return formatMedication(item);
+    if (item.name || item.icd_code) return formatDiagnosis(item);
+    return Object.values(item).filter(Boolean).join(" - ") || JSON.stringify(item);
+  }
+  return String(item);
+};
+
 const ReadOnlyList = ({ items }) => {
   if (!items || items.length === 0) {
     return <EmptyField />;
@@ -49,7 +81,7 @@ const ReadOnlyList = ({ items }) => {
         >
           <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-primary shrink-0" />
 
-          <span>{item}</span>
+          <span>{formatItem(item)}</span>
         </li>
       ))}
     </ul>

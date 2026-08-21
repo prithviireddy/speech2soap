@@ -6,7 +6,7 @@ import React from 'react';
  * Features:
  * - Subtle gradient sheen and glow hover shadows
  * - Micro-scale feedback on active press (`active:scale-[0.98]`)
- * - Disabled opacity and smooth cursor states
+ * - Clean dark/light theme compatibility (no hardcoded white backgrounds)
  */
 export const Button = ({
   variant = 'primary',
@@ -22,13 +22,13 @@ export const Button = ({
     primary:
       'bg-gradient-to-r from-brand-primary to-brand-primary-hover text-white shadow-sm hover:shadow-glow hover:-translate-y-0.5 active:scale-[0.98] border border-brand-primary/20',
     secondary:
-      'bg-white border border-border-strong text-text-primary hover:bg-bg-base hover:border-brand-primary hover:text-brand-primary active:scale-[0.98] shadow-xs',
+      'bg-bg-secondary text-text-primary border border-border-default hover:bg-bg-surface-subtle hover:border-border-strong hover:text-brand-primary active:scale-[0.98] shadow-2xs',
     accent:
       'bg-gradient-to-r from-brand-accent to-emerald-600 text-white shadow-sm hover:shadow-glow-accent hover:-translate-y-0.5 active:scale-[0.98]',
     danger:
       'bg-danger text-white hover:bg-red-700 active:scale-[0.98] shadow-xs hover:shadow-sm',
     outline:
-      'border border-border-default bg-transparent text-text-secondary hover:bg-bg-base hover:text-text-primary active:scale-[0.98]',
+      'border border-border-default bg-transparent text-text-secondary hover:bg-bg-surface-subtle hover:text-text-primary active:scale-[0.98]',
     ghost:
       'text-text-secondary hover:text-brand-primary hover:bg-brand-primary-light/50 active:scale-[0.98]',
     glass:

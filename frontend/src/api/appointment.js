@@ -30,3 +30,8 @@ export const updateAppointmentAPI = async(appointmentId, payload) => {
     return response.data;
 };
 
+export const deleteAppointmentAPI = async (appointmentId) => {
+    const response = await api.delete(`/admin/appointments/${appointmentId}`);
+    return response.data;
+};
+

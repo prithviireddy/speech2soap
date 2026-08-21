@@ -54,26 +54,26 @@
   --shadow-glow-accent: 0 0 25px -5px rgba(13, 148, 136, 0.25);
 }
 
-/* ── Dark Mode Token Overrides (Obsidian & Deep Black Gradient) ───────── */
+/* ── Dark Mode Token Overrides (True Neutral Obsidian & Black) ───────── */
 
 .dark {
-  --color-bg-base: #030712;
-  --color-bg-secondary: #0B0F19;
-  --color-bg-elevated: #111827;
-  --color-bg-surface-subtle: #171F2E;
+  --color-bg-base: #000000;
+  --color-bg-secondary: #0F0F12;
+  --color-bg-elevated: #18181C;
+  --color-bg-surface-subtle: #1F1F24;
 
-  --color-text-primary: #F9FAFB;
-  --color-text-secondary: #9CA3AF;
-  --color-text-muted: #6B7280;
+  --color-text-primary: #F4F4F5;
+  --color-text-secondary: #A1A1AA;
+  --color-text-muted: #71717A;
 
-  --color-border-default: #1F293D;
-  --color-border-subtle: #111827;
-  --color-border-strong: #374151;
-  --color-border-accent: rgba(59, 130, 246, 0.3);
+  --color-border-default: #27272A;
+  --color-border-subtle: #18181B;
+  --color-border-strong: #3F3F46;
+  --color-border-accent: rgba(59, 130, 246, 0.35);
 
   --color-brand-primary: #3B82F6;
   --color-brand-primary-hover: #60A5FA;
-  --color-brand-primary-light: rgba(59, 130, 246, 0.15);
+  --color-brand-primary-light: rgba(59, 130, 246, 0.12);
 
   --color-success-light: rgba(5, 150, 105, 0.15);
   --color-warning-light: rgba(217, 119, 6, 0.15);
@@ -108,7 +108,7 @@ html {
 }
 
 .dark .bg-radial-aura {
-  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.04) 0%, rgba(17, 24, 39, 0.4) 35%, transparent 70%);
+  background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.03) 0%, rgba(24, 24, 27, 0.4) 40%, transparent 70%);
 }
 
 /* ── Glassmorphism & Surface Utilities ───────────────── */
@@ -121,10 +121,10 @@ html {
 }
 
 .dark .glass-panel {
-  background: rgba(11, 15, 25, 0.85);
+  background: rgba(15, 15, 18, 0.88);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(31, 41, 61, 0.8);
+  border: 1px solid rgba(39, 39, 42, 0.85);
 }
 
 .glass-dropdown {
@@ -136,11 +136,11 @@ html {
 }
 
 .dark .glass-dropdown {
-  background: rgba(11, 15, 25, 0.95);
+  background: rgba(15, 15, 18, 0.96);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(31, 41, 61, 0.9);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(39, 39, 42, 0.9);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
 }
 
 /* Bento Card */
@@ -160,13 +160,13 @@ html {
 }
 
 .dark .bento-card {
-  background: #0B0F19;
-  border-color: #1F293D;
+  background: #0F0F12;
+  border-color: #27272A;
 }
 
 .dark .bento-card:hover {
-  border-color: #374151;
-  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.5), 0 4px 8px -4px rgba(0, 0, 0, 0.3);
+  border-color: #3F3F46;
+  box-shadow: 0 12px 24px -8px rgba(0, 0, 0, 0.6), 0 4px 8px -4px rgba(0, 0, 0, 0.4);
 }
 
 /* ── Keyframe Animations ─────────────────────────────── */

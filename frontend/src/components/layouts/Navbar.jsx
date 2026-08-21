@@ -1,32 +1,32 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useTheme } from '../../context/ThemeContext';
-import { Link } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Bell,
-  User as UserIcon,
+  Sun,
+  Moon,
   LogOut,
-  Settings,
-  Sparkles,
-  Stethoscope,
   ChevronDown,
   Activity,
   Menu,
-  Sun,
-  Moon,
+  X,
+  Stethoscope,
 } from 'lucide-react';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
-export const Navbar = ({ onMenuToggle }) => {
+export const Navbar = ({ onToggleSidebar, isSidebarOpen }) => {
   const { user, logout } = useAuth();
-  const { theme, toggleTheme, isDark } = useTheme();
+  const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const userMenuRef = useRef(null);
   const notifMenuRef = useRef(null);
 
-  // Close menus on click outside
+  // Close menus on outside click
   useEffect(() => {
-    const handleClickOutside = (e) => {
+    const handleOutsideClick = (e) => {
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setShowUserMenu(false);
       }
@@ -34,44 +34,46 @@ export const Navbar = ({ onMenuToggle }) => {
         setNotificationsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
-  const notifications = [
-    { id: 1, text: 'Clinical RAG assistant updated with Gemini 2.5', time: '10 min ago', type: 'info' },
-    { id: 2, text: 'New consultation audio ready for review', time: '1 hour ago', type: 'warning' },
-    { id: 3, text: 'Automated daily clinical backup complete', time: '3 hours ago', type: 'info' },
-  ];
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   const roleLabel = {
-    DOCTOR: 'Doctor',
-    PATIENT: 'Patient',
+    DOCTOR: 'Physician',
+    PATIENT: 'Patient Portal',
     ADMIN: 'Administrator',
-  }[user?.role] || user?.role;
+  }[user?.role] ?? user?.role;
+
+  const notifications = [
+    { id: 1, text: 'Clinical notes for Consultation #482 ready for review', time: '10m ago' },
+    { id: 2, text: 'Audio processing completed for Sarah Johnson', time: '1h ago' },
+  ];
 
   return (
-    <nav className="fixed top-0 left-0 w-full z-40 h-16 glass-panel border-b border-border-default shadow-xs">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex justify-between items-center">
-        {/* Left: Brand / Logo */}
+    <header className="sticky top-0 z-40 w-full border-b border-border-default glass-panel">
+      <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+        {/* Left: Mobile Toggle & Brand */}
         <div className="flex items-center gap-3">
           <button
-            onClick={onMenuToggle}
-            className="md:hidden p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            onClick={onToggleSidebar}
+            className="md:hidden p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-bg-surface-subtle transition-colors cursor-pointer"
+            aria-label="Toggle Sidebar"
           >
-            <Menu size={20} />
+            {isSidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
 
           <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-accent flex items-center justify-center text-white shadow-sm shadow-brand-primary/20 group-hover:scale-105 transition-transform">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-primary to-medical flex items-center justify-center text-white shadow-xs group-hover:scale-105 transition-transform">
               <Stethoscope size={18} />
             </div>
-            <div className="flex flex-col">
-              <span className="font-display font-bold text-lg text-text-primary tracking-tight group-hover:text-brand-primary transition-colors flex items-center gap-1.5">
-                ClinicReport
-                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded-full bg-brand-primary-light text-brand-primary uppercase tracking-wider border border-brand-primary/20">
-                  AI
-                </span>
+            <div className="hidden sm:block">
+              <span className="font-display font-bold text-base tracking-tight text-text-primary">
+                Cura<span className="text-brand-primary font-mono ml-0.5">.</span>
               </span>
             </div>
           </Link>
@@ -83,12 +85,12 @@ export const Navbar = ({ onMenuToggle }) => {
           <button
             onClick={toggleTheme}
             title={isDark ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
-            className="p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-border-default transition-all cursor-pointer"
+            className="p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-bg-surface-subtle border border-transparent hover:border-border-default transition-all cursor-pointer"
           >
             {isDark ? (
               <Sun size={18} className="text-amber-400 hover:rotate-45 transition-transform" />
             ) : (
-              <Moon size={18} className="text-slate-600 hover:-rotate-12 transition-transform" />
+              <Moon size={18} className="text-text-secondary hover:-rotate-12 transition-transform" />
             )}
           </button>
 
@@ -96,7 +98,7 @@ export const Navbar = ({ onMenuToggle }) => {
           <div className="relative" ref={notifMenuRef}>
             <button
               onClick={() => setNotificationsOpen(!notificationsOpen)}
-              className="relative p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-border-default transition-colors cursor-pointer"
+              className="relative p-2 rounded-xl text-text-secondary hover:text-text-primary hover:bg-bg-surface-subtle border border-transparent hover:border-border-default transition-colors cursor-pointer"
             >
               <Bell size={18} />
               <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-primary rounded-full animate-pulse-glow" />
@@ -104,7 +106,7 @@ export const Navbar = ({ onMenuToggle }) => {
 
             {notificationsOpen && (
               <div className="absolute right-0 mt-2 w-80 glass-dropdown rounded-2xl border border-border-default shadow-xl overflow-hidden z-50 animate-fade-in-scale">
-                <div className="px-4 py-3 border-b border-border-subtle bg-slate-50/50 dark:bg-slate-800/50 flex items-center justify-between">
+                <div className="px-4 py-3 border-b border-border-subtle bg-bg-surface-subtle/50 flex items-center justify-between">
                   <p className="font-semibold text-xs text-text-primary uppercase tracking-wider">
                     Notifications
                   </p>
@@ -116,7 +118,7 @@ export const Navbar = ({ onMenuToggle }) => {
                   {notifications.map((n) => (
                     <div
                       key={n.id}
-                      className="px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors cursor-pointer"
+                      className="px-4 py-3 hover:bg-bg-surface-subtle/60 transition-colors cursor-pointer"
                     >
                       <p className="text-xs font-medium text-text-primary leading-snug">
                         {n.text}
@@ -135,7 +137,7 @@ export const Navbar = ({ onMenuToggle }) => {
           <div className="relative" ref={userMenuRef}>
             <button
               onClick={() => setShowUserMenu(!showUserMenu)}
-              className="flex items-center gap-2.5 p-1.5 pl-2 rounded-2xl hover:bg-slate-100/80 dark:hover:bg-slate-800/80 border border-transparent hover:border-border-default transition-all cursor-pointer"
+              className="flex items-center gap-2.5 p-1.5 pl-2 rounded-2xl hover:bg-bg-surface-subtle border border-transparent hover:border-border-default transition-all cursor-pointer"
             >
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-brand-primary to-medical flex items-center justify-center text-white font-display font-bold text-xs shadow-xs">
                 {(user?.full_name ?? user?.email)?.charAt(0).toUpperCase()}
@@ -153,7 +155,7 @@ export const Navbar = ({ onMenuToggle }) => {
 
             {showUserMenu && (
               <div className="absolute right-0 mt-2 w-56 glass-dropdown rounded-2xl border border-border-default shadow-xl overflow-hidden z-50 animate-fade-in-scale p-1.5">
-                <div className="px-3 py-2.5 border-b border-border-subtle bg-slate-50/70 dark:bg-slate-800/70 rounded-xl mb-1">
+                <div className="px-3 py-2.5 border-b border-border-subtle bg-bg-surface-subtle/70 rounded-xl mb-1">
                   <p className="font-semibold text-xs text-text-primary truncate">
                     {user?.full_name || 'User Profile'}
                   </p>
@@ -174,27 +176,24 @@ export const Navbar = ({ onMenuToggle }) => {
                       : '/admin/dashboard'
                   }
                   onClick={() => setShowUserMenu(false)}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-text-secondary hover:text-brand-primary hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-text-secondary hover:text-brand-primary hover:bg-bg-surface-subtle transition-colors"
                 >
                   <Activity size={15} />
                   Dashboard
                 </Link>
 
                 <button
-                  onClick={() => {
-                    setShowUserMenu(false);
-                    logout();
-                  }}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-danger hover:bg-danger-light transition-colors mt-1 font-medium cursor-pointer"
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs text-danger hover:bg-danger-light/50 transition-colors mt-1 cursor-pointer"
                 >
                   <LogOut size={15} />
-                  Log Out
+                  Sign Out
                 </button>
               </div>
             )}
           </div>
         </div>
       </div>
-    </nav>
+    </header>
   );
 };

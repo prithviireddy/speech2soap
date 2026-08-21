@@ -6,3 +6,4 @@ export { Tabs } from './Tabs';
 export { LoadingSpinner } from './LoadingSpinner';
 export { PipelineStageTracker } from './PipelineStageTracker';
 export { TranscriptPanel } from './TranscriptPanel';
+export { DateTimePicker } from './DateTimePicker';

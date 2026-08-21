@@ -64,7 +64,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
                   className={`group relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                     isActive
                       ? 'bg-brand-primary text-white shadow-sm shadow-brand-primary/25 font-semibold'
-                      : 'text-text-secondary hover:text-text-primary hover:bg-slate-100/80'
+                      : 'text-text-secondary hover:text-text-primary hover:bg-bg-surface-subtle'
                   }`}
                 >
                   <Icon

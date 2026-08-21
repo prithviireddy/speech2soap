@@ -18,11 +18,11 @@ export const AuthLayout = ({ children }) => {
           </div>
 
           <h1 className="text-3xl font-display font-bold text-text-primary tracking-tight">
-            ClinicReport
+            Cura
           </h1>
 
           <p className="mt-2 text-sm text-text-secondary">
-            AI-Assisted Clinical Documentation & Patient RAG Intelligence
+            Ambient Clinical Intelligence & Documentation
           </p>
         </div>
 

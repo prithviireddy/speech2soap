@@ -16,7 +16,7 @@ export const Badge = ({
     primary:
       'bg-brand-primary-light text-brand-primary border border-brand-primary/20',
     secondary:
-      'bg-slate-100 text-slate-600 border border-slate-200/80',
+      'bg-bg-surface-subtle text-text-secondary border border-border-default',
     success:
       'bg-success-light text-success border border-success/25',
     warning:
@@ -28,18 +28,18 @@ export const Badge = ({
     medical:
       'bg-medical-light text-medical border border-medical/25',
     outline:
-      'bg-white border border-border-default text-text-secondary',
+      'bg-bg-secondary border border-border-default text-text-secondary',
   };
 
   const dotColors = {
     primary: 'bg-brand-primary',
-    secondary: 'bg-slate-400',
+    secondary: 'bg-text-muted',
     success: 'bg-success',
     warning: 'bg-warning',
     danger: 'bg-danger',
     info: 'bg-info',
     medical: 'bg-medical',
-    outline: 'bg-slate-400',
+    outline: 'bg-text-muted',
   };
 
   const sizes = {

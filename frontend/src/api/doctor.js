@@ -229,3 +229,13 @@ export const reindexPatientRAGAPI = async (patientId) => {
   );
   return response.data;
 };
+
+export const deleteDoctorAppointmentAPI = async (appointmentId) => {
+  const response = await api.delete(`/doctor/appointments/${appointmentId}`);
+  return response.data;
+};
+
+export const deleteDoctorConsultationAPI = async (consultationId) => {
+  const response = await api.delete(`/doctor/consultations/${consultationId}`);
+  return response.data;
+};

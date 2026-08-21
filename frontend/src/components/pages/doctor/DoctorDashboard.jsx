@@ -12,6 +12,7 @@ import {
   UploadCloud,
   ChevronRight,
   Sparkles,
+  Trash2,
 } from "lucide-react";
 
 import { useAuth } from "../../../context/AuthContext";
@@ -22,6 +23,8 @@ import {
   listDoctorAppointmentsAPI,
   getDoctorConsultationsAPI,
   getDoctorReportsAPI,
+  deleteDoctorAppointmentAPI,
+  deleteDoctorConsultationAPI,
 } from "../../../api/doctor";
 
 /* ── Helpers ───────────────────────────────────────── */
@@ -46,131 +49,120 @@ const isThisWeek = (dateStr) => {
 
 const fmtTime = (dateStr) =>
   new Date(dateStr).toLocaleTimeString([], {
-    hour: "2-digit",
+    hour: "numeric",
     minute: "2-digit",
   });
 
-const fmtDate = (dateStr) =>
-  new Date(dateStr).toLocaleDateString([], { month: "short", day: "numeric" });
-
-const greeting = () => {
-  const h = new Date().getHours();
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  return "Good evening";
-};
-
-const formatDoctorName = (name) => {
-  if (!name) return "Doctor";
-  const trimmed = name.trim();
-  if (/^dr\.?\s+/i.test(trimmed)) {
-    return trimmed;
+const apptBadgeVariant = (status) => {
+  switch (status) {
+    case "CHECKED_IN":
+    case "IN_PROGRESS":
+      return "warning";
+    case "COMPLETED":
+      return "success";
+    case "CANCELLED":
+    case "NO_SHOW":
+      return "danger";
+    case "SCHEDULED":
+    default:
+      return "info";
   }
-  return `Dr. ${trimmed}`;
 };
 
-const todayLabel = () =>
-  new Date().toLocaleDateString([], {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  });
+const consultBadgeVariant = (status) => {
+  switch (status) {
+    case "APPROVED":
+      return "success";
+    case "REVIEW_PENDING":
+      return "warning";
+    case "FAILED":
+      return "danger";
+    case "TRANSCRIBING":
+    case "PROCESSING":
+    case "UPLOADED":
+    default:
+      return "info";
+  }
+};
 
-/* ── Status styling maps ───────────────────────────── */
+const formatDoctorName = (rawName) => {
+  if (!rawName) return "Physician";
+  return rawName.replace(/^dr\.?\s+/i, "");
+};
 
-const apptBadgeVariant = (s) =>
-  ({
-    SCHEDULED: "info",
-    CHECKED_IN: "warning",
-    IN_PROGRESS: "warning",
-    COMPLETED: "success",
-    CANCELLED: "danger",
-    NO_SHOW: "danger",
-  }[s] ?? "secondary");
+/* ── Sub-components ─────────────────────────────────── */
 
-const consultBadgeVariant = (s) =>
-  ({
-    UPLOADED: "secondary",
-    TRANSCRIBING: "info",
-    PROCESSING: "info",
-    REVIEW_PENDING: "warning",
-    APPROVED: "success",
-    FAILED: "danger",
-  }[s] ?? "secondary");
-
-/* ── Bento KPI Tile ────────────────────────────────── */
-
-const StatTile = ({
+const KPICard = ({
   icon: Icon,
+  iconColor,
+  iconBg,
   label,
   value,
-  color,
-  bg,
-  border,
-  trend,
-  trendVariant = "default",
-}) => {
-  const trendClasses =
-    {
-      warning:
-        "bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800/50",
-      default:
-        "bg-slate-100/90 text-slate-600 border-slate-200/80 dark:bg-slate-800/80 dark:text-slate-300 dark:border-slate-700/60",
-    }[trendVariant] ||
-    "bg-slate-100/90 text-slate-600 border-slate-200/80 dark:bg-slate-800/80 dark:text-slate-300 dark:border-slate-700/60";
-
-  return (
-    <div className="bento-card p-5 flex flex-col justify-between group hover:shadow-md transition-all">
-      <div className="flex items-center justify-between mb-3.5">
-        <div
-          className={`p-2.5 rounded-xl ${bg} ${border} border shadow-2xs group-hover:scale-105 transition-transform`}
-        >
-          <Icon size={20} className={color} />
-        </div>
-        {trend && (
-          <span
-            className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full border font-sans ${trendClasses}`}
-          >
-            {trend}
-          </span>
-        )}
-      </div>
-      <div>
-        <p className="text-3xl font-bold font-display tracking-tight text-text-primary">
-          {value}
-        </p>
-        <p className="text-xs text-text-secondary mt-1 font-medium">{label}</p>
+  sub,
+  to,
+}) => (
+  <Card className="bento-card p-5 group flex flex-col justify-between">
+    <div className="flex items-center justify-between mb-3">
+      <span className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+        {label}
+      </span>
+      <div
+        className={`w-9 h-9 rounded-xl ${iconBg} ${iconColor} flex items-center justify-center transition-transform duration-200 group-hover:scale-110 shadow-2xs`}
+      >
+        <Icon size={18} />
       </div>
     </div>
-  );
-};
+    <div>
+      <div className="text-2xl sm:text-3xl font-display font-bold text-text-primary tracking-tight">
+        {value}
+      </div>
+      {sub && (
+        <p className="text-[11px] text-text-muted mt-1 font-medium">{sub}</p>
+      )}
+    </div>
+    {to && (
+      <Link
+        to={to}
+        className="mt-3.5 pt-2.5 border-t border-border-subtle flex items-center justify-between text-[11px] font-semibold text-brand-primary hover:text-brand-primary-hover group/link"
+      >
+        <span>View details</span>
+        <ArrowUpRight
+          size={12}
+          className="transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5"
+        />
+      </Link>
+    )}
+  </Card>
+);
 
-/* ── Section Header ────────────────────────────────── */
-
-const SectionHeader = ({ title, subtitle, icon: Icon, to, linkLabel }) => (
-  <div className="flex items-center justify-between mb-4 pb-3 border-b border-border-subtle">
+const SectionHeader = ({ icon: Icon, title, subtitle, to, linkLabel }) => (
+  <div className="flex items-center justify-between pb-3 mb-4 border-b border-border-subtle">
     <div className="flex items-center gap-2.5">
       <div className="p-1.5 rounded-lg bg-brand-primary-light text-brand-primary">
         <Icon size={16} />
       </div>
       <div>
-        <h2 className="text-sm font-display font-bold text-text-primary">{title}</h2>
-        {subtitle && <p className="text-[11px] text-text-muted">{subtitle}</p>}
+        <h2 className="text-sm font-display font-bold text-text-primary">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="text-[11px] text-text-muted">{subtitle}</p>
+        )}
       </div>
     </div>
     {to && (
       <Link
         to={to}
-        className="text-xs font-semibold text-brand-primary hover:text-brand-primary-hover flex items-center gap-1 transition-colors"
+        className="text-xs font-semibold text-brand-primary hover:text-brand-primary-hover flex items-center gap-0.5"
       >
-        <span>{linkLabel ?? "View all"}</span>
-        <ArrowUpRight size={13} />
+        <span>{linkLabel || "View all"}</span>
+        <ChevronRight size={13} />
       </Link>
     )}
   </div>
 );
 
-/* ── Main Doctor Dashboard ─────────────────────────── */
+/* ── Main Component ─────────────────────────────────── */
 
 export const DoctorDashboard = () => {
   const { user } = useAuth();
@@ -181,6 +173,20 @@ export const DoctorDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const todayLabel = () =>
+    new Date().toLocaleDateString([], {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+    });
+
+  const greeting = () => {
+    const h = new Date().getHours();
+    if (h < 12) return "Good morning";
+    if (h < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -189,18 +195,44 @@ export const DoctorDashboard = () => {
     try {
       setLoading(true);
       setError("");
-      const [appts, consults, reps] = await Promise.all([
-        listDoctorAppointmentsAPI(),
-        getDoctorConsultationsAPI(),
-        getDoctorReportsAPI(),
+
+      const [apptData, consultData, reportData] = await Promise.all([
+        listDoctorAppointmentsAPI().catch(() => []),
+        getDoctorConsultationsAPI().catch(() => []),
+        getDoctorReportsAPI().catch(() => []),
       ]);
-      setAppointments(appts || []);
-      setConsultations(consults || []);
-      setReports(reps || []);
+
+      setAppointments(apptData || []);
+      setConsultations(consultData || []);
+      setReports(reportData || []);
     } catch (err) {
       setError(err?.response?.data?.detail || "Failed to load dashboard data.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteConsultation = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this consultation record?")) return;
+    try {
+      await deleteDoctorConsultationAPI(id);
+      setConsultations((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      alert(err?.response?.data?.detail || "Failed to delete consultation.");
+    }
+  };
+
+  const handleDeleteAppointment = async (e, id) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this appointment?")) return;
+    try {
+      await deleteDoctorAppointmentAPI(id);
+      setAppointments((prev) => prev.filter((a) => a.id !== id));
+    } catch (err) {
+      alert(err?.response?.data?.detail || "Failed to delete appointment.");
     }
   };
 
@@ -221,7 +253,7 @@ export const DoctorDashboard = () => {
   const processingConsultations = useMemo(
     () =>
       consultations.filter((c) =>
-        ["UPLOADED", "TRANSCRIBING", "PROCESSING"].includes(c.status)
+        ["UPLOADED", "TRANSCRIBING", "PROCESSING", "FAILED"].includes(c.status)
       ),
     [consultations]
   );
@@ -249,7 +281,7 @@ export const DoctorDashboard = () => {
       <DashboardLayout>
         <div className="space-y-6">
           <h1 className="text-3xl font-display font-bold">
-            {greeting()}, {formatDoctorName(user?.name || user?.full_name)}
+            {greeting()}, Dr. {formatDoctorName(user?.name || user?.full_name)}
           </h1>
           <Card className="border-danger/30 bg-danger-light/30">
             <p className="text-danger text-sm font-medium">{error}</p>
@@ -278,26 +310,37 @@ export const DoctorDashboard = () => {
                 <span>{todayLabel()}</span>
               </div>
               <h1 className="text-3xl sm:text-4xl font-display font-bold tracking-tight">
-                {greeting()}, {formatDoctorName(user?.name || user?.full_name)}
+                {greeting()},{" "}
+                <span className="text-white">
+                  Dr. {formatDoctorName(user?.name || user?.full_name)}
+                </span>
               </h1>
-              <p className="text-sm text-slate-300 max-w-xl leading-relaxed">
-                You have <span className="text-white font-semibold">{todaysAppointments.length} appointments</span> scheduled for today and <span className="text-amber-300 font-semibold">{pendingReports.length} reports</span> pending clinical review.
+              <p className="text-sm text-slate-300 max-w-xl">
+                You have{" "}
+                <strong className="text-white font-semibold">
+                  {todaysAppointments.length} appointment
+                  {todaysAppointments.length !== 1 ? "s" : ""}
+                </strong>{" "}
+                scheduled for today and{" "}
+                <strong className="text-amber-400 font-semibold">
+                  {pendingReports.length} report
+                  {pendingReports.length !== 1 ? "s" : ""}
+                </strong>{" "}
+                pending clinical review.
               </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3">
-              <Link to="/doctor/consultations/upload">
-                <Button
-                  variant="primary"
-                  className="bg-brand-primary text-white hover:bg-brand-primary-hover shadow-md shadow-brand-primary/30 border border-brand-primary/20"
-                >
-                  <UploadCloud size={16} />
-                  <span>Upload Audio</span>
+            {/* Quick Actions */}
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <Link to="/doctor/appointments">
+                <Button variant="primary" className="py-2.5 px-4 text-xs font-semibold gap-2 shadow-md shadow-brand-primary/30">
+                  <CalendarDays size={15} />
+                  <span>View Schedule</span>
                 </Button>
               </Link>
               <Link to="/doctor/reports">
-                <button className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-all active:scale-[0.98] shadow-sm cursor-pointer">
-                  <FileText size={16} />
+                <button className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold rounded-xl bg-white/10 hover:bg-white/20 text-white border border-white/20 backdrop-blur-md transition-all active:scale-[0.98] shadow-sm cursor-pointer">
+                  <FileText size={15} />
                   <span>Review Reports ({pendingReports.length})</span>
                 </button>
               </Link>
@@ -305,79 +348,80 @@ export const DoctorDashboard = () => {
           </div>
         </div>
 
-        {/* ── Bento KPI Tiles ── */}
+        {/* ── KPI Grid ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatTile
+          <KPICard
             icon={CalendarDays}
-            label="Today's Appointments"
+            iconBg="bg-blue-50 dark:bg-blue-950/40"
+            iconColor="text-blue-600 dark:text-blue-400"
+            label="Today's Schedule"
             value={todaysAppointments.length}
-            color="text-blue-600 dark:text-blue-400"
-            bg="bg-blue-50/90 dark:bg-blue-950/40"
-            border="border-blue-200/80 dark:border-blue-800/50"
-            trend="Today"
-            trendVariant="default"
+            sub={`${appointments.length} total scheduled`}
+            to="/doctor/appointments"
           />
-          <StatTile
+
+          <KPICard
             icon={FileText}
-            label="Pending Reviews"
+            iconBg="bg-amber-50 dark:bg-amber-950/40"
+            iconColor="text-amber-600 dark:text-amber-400"
+            label="Pending Review"
             value={pendingReports.length}
-            color="text-amber-600 dark:text-amber-400"
-            bg="bg-amber-50/90 dark:bg-amber-950/40"
-            border="border-amber-200/80 dark:border-amber-800/50"
-            trend={pendingReports.length > 0 ? "Action needed" : "All clear"}
-            trendVariant={pendingReports.length > 0 ? "warning" : "default"}
+            sub="Requires doctor sign-off"
+            to="/doctor/reports"
           />
-          <StatTile
+
+          <KPICard
             icon={Activity}
-            label="Active AI Pipeline"
+            iconBg="bg-cyan-50 dark:bg-cyan-950/40"
+            iconColor="text-cyan-600 dark:text-cyan-400"
+            label="In Pipeline"
             value={processingConsultations.length}
-            color="text-sky-600 dark:text-sky-400"
-            bg="bg-sky-50/90 dark:bg-sky-950/40"
-            border="border-sky-200/80 dark:border-sky-800/50"
-            trend="Real-time"
-            trendVariant="default"
+            sub="AI processing active"
+            to="/doctor/consultations"
           />
-          <StatTile
+
+          <KPICard
             icon={CheckCircle2}
-            label="Approved This Week"
+            iconBg="bg-emerald-50 dark:bg-emerald-950/40"
+            iconColor="text-emerald-600 dark:text-emerald-400"
+            label="Approved (Week)"
             value={approvedThisWeek}
-            color="text-emerald-600 dark:text-emerald-400"
-            bg="bg-emerald-50/90 dark:bg-emerald-950/40"
-            border="border-emerald-200/80 dark:border-emerald-800/50"
-            trend="Last 7 days"
-            trendVariant="default"
+            sub="Indexed to patient record"
+            to="/doctor/reports"
           />
         </div>
 
-        {/* ── Two-Column Bento Workspace ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Today's Schedule Card */}
-          <Card className="bento-card p-6">
-            <SectionHeader
-              icon={CalendarDays}
-              title="Today's Schedule"
-              subtitle={`${todaysAppointments.length} patient${
-                todaysAppointments.length !== 1 ? "s" : ""
-              } scheduled`}
-              to="/doctor/appointments"
-              linkLabel="View calendar"
-            />
+        {/* ── Main Two-Column Hub ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Today's Schedule (7 cols) */}
+          <Card className="bento-card p-6 lg:col-span-7 flex flex-col justify-between">
+            <div>
+              <SectionHeader
+                icon={CalendarDays}
+                title="Today's Schedule"
+                subtitle={`${todaysAppointments.length} appointment${
+                  todaysAppointments.length !== 1 ? "s" : ""
+                } scheduled`}
+                to="/doctor/appointments"
+                linkLabel="View calendar"
+              />
 
-            {todaysAppointments.length === 0 ? (
-              <div className="py-12 text-center text-text-muted">
-                <CalendarDays size={32} className="mx-auto mb-2 opacity-40" />
-                <p className="text-xs">No appointments scheduled for today.</p>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {todaysAppointments.map((appt) => (
-                  <Link
-                    key={appt.id}
-                    to={`/doctor/appointments/${appt.id}`}
-                    className="block group"
-                  >
-                    <div className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-border-default bg-bg-base hover:bg-white hover:border-brand-primary/30 hover:shadow-xs transition-all">
-                      <div className="flex items-center gap-3 min-w-0">
+              {todaysAppointments.length === 0 ? (
+                <div className="py-12 text-center text-text-muted">
+                  <CalendarDays size={32} className="mx-auto mb-2 opacity-40" />
+                  <p className="text-xs">No appointments scheduled for today.</p>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {todaysAppointments.map((appt) => (
+                    <div
+                      key={appt.id}
+                      className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-border-default bg-bg-base/70 hover:bg-bg-base hover:border-brand-primary/30 transition-all group"
+                    >
+                      <Link
+                        to={`/doctor/appointments/${appt.id}`}
+                        className="flex items-center gap-3 min-w-0 flex-1"
+                      >
                         <div className="w-8 h-8 rounded-xl bg-brand-primary-light text-brand-primary flex items-center justify-center font-mono text-xs font-semibold shrink-0">
                           {fmtTime(appt.scheduled_at)}
                         </div>
@@ -389,72 +433,87 @@ export const DoctorDashboard = () => {
                             {appt.patient_number || "Patient Record"}
                           </p>
                         </div>
+                      </Link>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <Badge variant={apptBadgeVariant(appt.status)} size="sm">
+                          {appt.status.replace("_", " ")}
+                        </Badge>
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteAppointment(e, appt.id)}
+                          className="p-1.5 rounded-lg text-text-muted hover:text-danger hover:bg-danger-light/40 transition-colors opacity-40 group-hover:opacity-100 cursor-pointer"
+                          title="Delete appointment"
+                        >
+                          <Trash2 size={13} />
+                        </button>
                       </div>
-                      <Badge variant={apptBadgeVariant(appt.status)} size="sm">
-                        {appt.status.replace("_", " ")}
-                      </Badge>
                     </div>
-                  </Link>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </Card>
 
-          {/* Pending Reviews Card */}
-          <Card className="bento-card p-6">
-            <SectionHeader
-              icon={FileText}
-              title="Pending Report Approvals"
-              subtitle="Draft AI clinical reports awaiting physician sign-off"
-              to="/doctor/reports"
-              linkLabel="View all"
-            />
+          {/* Pending Sign-Off Reports (5 cols) */}
+          <Card className="bento-card p-6 lg:col-span-5 flex flex-col justify-between">
+            <div>
+              <SectionHeader
+                icon={FileText}
+                title="Pending Sign-Off"
+                subtitle={`${pendingReports.length} report${
+                  pendingReports.length !== 1 ? "s" : ""
+                } awaiting review`}
+                to="/doctor/reports"
+                linkLabel="All reports"
+              />
 
-            {pendingReports.length === 0 ? (
-              <div className="py-12 text-center text-text-muted">
-                <CheckCircle2 size={32} className="mx-auto mb-2 text-emerald-500 opacity-80" />
-                <p className="text-xs font-medium text-text-primary">
-                  All clinical reports approved!
-                </p>
-                <p className="text-[11px] text-text-muted mt-0.5">
-                  Great work. No draft reports are currently pending your review.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2.5">
-                {pendingReports.slice(0, 5).map((report) => (
-                  <div
-                    key={report.id}
-                    className="flex items-center justify-between gap-3 p-3.5 rounded-xl border border-amber-200/60 dark:border-amber-900/40 bg-amber-50/40 dark:bg-amber-950/25 hover:bg-amber-50/80 dark:hover:bg-amber-950/40 transition-colors"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0">
-                      <div className="w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 flex items-center justify-center shrink-0">
-                        <FileText size={14} />
+              {pendingReports.length === 0 ? (
+                <div className="py-12 text-center text-text-muted">
+                  <CheckCircle2 size={32} className="mx-auto mb-2 opacity-40 text-emerald-500" />
+                  <p className="text-xs font-medium text-text-primary">All caught up!</p>
+                  <p className="text-[11px] mt-0.5">No reports waiting for sign-off.</p>
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  {pendingReports.slice(0, 4).map((report) => (
+                    <div
+                      key={report.id}
+                      className="flex items-center justify-between gap-3 p-3 rounded-xl border border-border-default bg-bg-base/70 hover:bg-bg-base transition-all"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-7 h-7 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+                          <Clock size={13} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-text-primary truncate">
+                            {report.patient_name}
+                          </p>
+                          <p className="text-[10px] text-text-muted font-mono truncate">
+                            Generated{" "}
+                            {new Date(report.created_at).toLocaleDateString([], {
+                              month: "short",
+                              day: "numeric",
+                            })}
+                          </p>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-text-primary truncate">
-                          {report.patient_name}
-                        </p>
-                        <p className="text-[10px] text-text-muted">
-                          Generated {fmtDate(report.created_at || report.updated_at)}
-                        </p>
-                      </div>
+                      <Link to={`/doctor/reports/${report.id}`}>
+                        <Button variant="primary" size="sm" className="h-7 px-2.5 text-xs">
+                          Review →
+                        </Button>
+                      </Link>
                     </div>
-                    <Link to={`/doctor/reports/${report.id}`}>
-                      <Button variant="primary" size="sm" className="h-8 px-3 text-xs">
-                        Review →
-                      </Button>
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
           </Card>
         </div>
 
         {/* ── Active AI Processing Pipeline ── */}
         {processingConsultations.length > 0 && (
-          <Card className="bento-card p-6 border-cyan-200/60 bg-cyan-50/20">
+          <Card className="bento-card p-6">
             <SectionHeader
               icon={Activity}
               title="Active AI Documentation Pipeline"
@@ -465,37 +524,56 @@ export const DoctorDashboard = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {processingConsultations.map((c) => (
-                <Link
+                <div
                   key={c.id}
-                  to={`/doctor/consultations/${c.id}`}
-                  className="block p-4 rounded-xl bg-white border border-border-default hover:border-cyan-400 hover:shadow-xs transition-all"
+                  className="p-3.5 rounded-xl border border-border-default bg-bg-base/70 hover:border-cyan-500/50 hover:bg-bg-base transition-all group relative"
                 >
                   <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
+                    <Link
+                      to={`/doctor/consultations/${c.id}`}
+                      className="flex items-center gap-2 min-w-0 flex-1 hover:text-brand-primary"
+                    >
                       <User size={14} className="text-text-muted" />
-                      <span className="font-semibold text-xs text-text-primary">
+                      <span className="font-semibold text-xs text-text-primary truncate">
                         {c.patient_name}
                       </span>
-                    </div>
-                    <Badge variant={consultBadgeVariant(c.status)} size="sm" pulse>
-                      {c.status}
-                    </Badge>
-                  </div>
+                    </Link>
 
-                  <p className="text-[11px] text-text-secondary mb-2 flex items-center gap-1.5 font-medium">
-                    <Clock size={12} className="text-cyan-600" />
-                    <span>{c.current_stage || "Processing audio recording..."}</span>
-                  </p>
-
-                  <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-brand-primary to-cyan-500 rounded-full relative overflow-hidden transition-all duration-500"
-                      style={{ width: `${c.progress || 25}%` }}
-                    >
-                      <div className="absolute inset-0 shimmer-bar" />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Badge variant={consultBadgeVariant(c.status)} size="sm" pulse={c.status !== "FAILED"}>
+                        {c.status}
+                      </Badge>
+                      <button
+                        type="button"
+                        onClick={(e) => handleDeleteConsultation(e, c.id)}
+                        className="p-1 rounded-lg text-text-muted hover:text-danger hover:bg-danger-light/40 transition-colors opacity-60 group-hover:opacity-100 cursor-pointer"
+                        title="Delete / dismiss consultation"
+                      >
+                        <Trash2 size={13} />
+                      </button>
                     </div>
                   </div>
-                </Link>
+
+                  <Link to={`/doctor/consultations/${c.id}`} className="block">
+                    <p className="text-[11px] text-text-secondary mb-2.5 flex items-center gap-1.5 font-medium">
+                      <Clock size={12} className={c.status === "FAILED" ? "text-danger" : "text-cyan-500"} />
+                      <span>{c.current_stage || (c.status === "FAILED" ? "Failed during audio pipeline" : "Processing audio...")}</span>
+                    </p>
+
+                    <div className="w-full h-1.5 bg-border-default/60 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full relative overflow-hidden transition-all duration-500 ${
+                          c.status === "FAILED"
+                            ? "bg-danger"
+                            : "bg-gradient-to-r from-brand-primary to-cyan-500"
+                        }`}
+                        style={{ width: `${c.progress || (c.status === "FAILED" ? 100 : 25)}%` }}
+                      >
+                        {c.status !== "FAILED" && <div className="absolute inset-0 shimmer-bar" />}
+                      </div>
+                    </div>
+                  </Link>
+                </div>
               ))}
             </div>
           </Card>

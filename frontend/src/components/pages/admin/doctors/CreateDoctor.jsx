@@ -50,8 +50,8 @@ export const CreateDoctor = () => {
             Create Doctor
           </h1>
 
-          <p className="text-gray-500 mt-2">
-            Register a new doctor who can access ClinicReport.
+          <p className="text-text-secondary mt-2">
+            Register a new doctor who can access Cura.
           </p>
         </div>
 

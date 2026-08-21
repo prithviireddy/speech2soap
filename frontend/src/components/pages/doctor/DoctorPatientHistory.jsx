@@ -8,6 +8,10 @@ import {
   Clock,
   FileText,
   User,
+  Activity,
+  ArrowRight,
+  ShieldCheck,
+  ChevronRight,
 } from "lucide-react";
 
 import { DashboardLayout } from "../../layouts/DashboardLayout";
@@ -15,40 +19,40 @@ import { Card, Badge, Button, LoadingSpinner } from "../../shared";
 import { getDoctorPatientHistoryAPI } from "../../../api/doctor";
 import { PatientRAGAssistant } from "./PatientRAGAssistant";
 
-/* ── Helpers ─────────────────────────────────────────── */
-
+/* ── Status badge variant helper ─────────────────────── */
 const statusVariant = {
-  UPLOADED:       "secondary",
-  TRANSCRIBING:   "info",
-  PROCESSING:     "info",
+  UPLOADED: "secondary",
+  TRANSCRIBING: "info",
+  PROCESSING: "info",
   REVIEW_PENDING: "warning",
-  APPROVED:       "success",
-  FAILED:         "danger",
+  APPROVED: "success",
+  FAILED: "danger",
 };
 
 const fmtDate = (d) =>
   new Date(d).toLocaleDateString([], {
-    year: "numeric", month: "long", day: "numeric",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 
-/* ── Tab nav ─────────────────────────────────────────── */
-
+/* ── Tab navigation items ────────────────────────────── */
 const TABS = [
-  { key: "timeline",  label: "Timeline",     icon: Clock },
-  { key: "assistant", label: "AI Assistant", icon: Brain },
+  { key: "timeline", label: "Consultation Timeline", icon: Clock },
+  { key: "assistant", label: "Grounded AI Assistant", icon: Brain },
 ];
-
-/* ── Main component ──────────────────────────────────── */
 
 export const DoctorPatientHistory = () => {
   const { patientId } = useParams();
 
   const [history, setHistory] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error,   setError]   = useState("");
-  const [tab,     setTab]     = useState("timeline");
+  const [error, setError] = useState("");
+  const [tab, setTab] = useState("timeline");
 
-  useEffect(() => { fetchHistory(); }, [patientId]);
+  useEffect(() => {
+    fetchHistory();
+  }, [patientId]);
 
   const fetchHistory = async () => {
     try {
@@ -57,7 +61,9 @@ export const DoctorPatientHistory = () => {
       const data = await getDoctorPatientHistoryAPI(patientId);
       setHistory(data);
     } catch (err) {
-      setError(err?.response?.data?.detail || "Failed to load patient history.");
+      setError(
+        err?.response?.data?.detail || "Failed to load patient history."
+      );
     } finally {
       setLoading(false);
     }
@@ -66,177 +72,241 @@ export const DoctorPatientHistory = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex justify-center py-20"><LoadingSpinner /></div>
+        <div className="flex justify-center items-center py-24">
+          <LoadingSpinner />
+        </div>
       </DashboardLayout>
     );
   }
 
-  if (error) {
+  if (error || !history) {
     return (
       <DashboardLayout>
-        <Card>
-          <p className="text-danger text-sm">{error}</p>
-          <Button variant="secondary" onClick={fetchHistory} className="mt-4">Try Again</Button>
+        <Card className="bento-card border-danger/30 bg-danger-light/20 p-6 text-center max-w-lg mx-auto mt-12">
+          <p className="text-danger text-sm font-medium">
+            {error || "Patient not found."}
+          </p>
+          <Button variant="secondary" onClick={fetchHistory} className="mt-4">
+            Try Again
+          </Button>
         </Card>
       </DashboardLayout>
     );
   }
 
-  if (!history) return null;
-
   const consultations = history.consultations ?? [];
+  const approvedCount = consultations.filter((c) => c.report_approved).length;
+  const pendingCount = consultations.filter(
+    (c) => c.status === "REVIEW_PENDING"
+  ).length;
 
   return (
     <DashboardLayout>
-      <div className="max-w-5xl mx-auto space-y-6 animate-fade-in-up">
-
-        {/* Back */}
+      <div className="space-y-6 animate-fade-in-up max-w-5xl">
+        {/* Back Link */}
         <Link
           to="/doctor/appointments"
-          className="inline-flex items-center gap-2 text-sm text-text-secondary hover:text-brand-primary transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-brand-primary transition-colors cursor-pointer"
         >
-          <ArrowLeft size={16} /> Back to Appointments
+          <ArrowLeft size={14} />
+          <span>Back to Appointments</span>
         </Link>
 
-        {/* Patient header */}
-        <div className="flex items-start gap-4">
-          <div className="p-3 rounded-xl bg-brand-primary-light text-brand-primary">
-            <User size={28} />
+        {/* Patient Profile Header Card */}
+        <Card className="bento-card p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-brand-primary text-white shadow-md shadow-brand-primary/25 flex items-center justify-center font-display font-bold text-xl shrink-0">
+                {history.patient_name
+                  ? history.patient_name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .slice(0, 2)
+                      .join("")
+                      .toUpperCase()
+                  : "PT"}
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <h1 className="text-2xl font-display font-bold text-text-primary">
+                    {history.patient_name}
+                  </h1>
+                  <span className="px-2.5 py-0.5 rounded-full bg-bg-base border border-border-default text-xs font-mono text-text-muted">
+                    {history.patient_number || "PATIENT RECORD"}
+                  </span>
+                </div>
+                <p className="text-xs text-text-secondary mt-1">
+                  Longitudinal clinical record, consultation transcripts, and grounded AI assistant.
+                </p>
+              </div>
+            </div>
           </div>
-          <div>
-            <h1 className="text-4xl font-display font-bold">{history.patient_name}</h1>
-            <p className="text-text-muted text-sm mt-1 font-mono">{history.patient_number}</p>
-          </div>
+        </Card>
+
+        {/* Summary Stat Ribbon */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Card className="bento-card p-4 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">
+                Total Consultations
+              </p>
+              <p className="text-2xl font-bold font-display text-text-primary mt-0.5">
+                {consultations.length}
+              </p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400">
+              <Activity size={18} />
+            </div>
+          </Card>
+
+          <Card className="bento-card p-4 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">
+                Reports Approved
+              </p>
+              <p className="text-2xl font-bold font-display text-emerald-600 dark:text-emerald-400 mt-0.5">
+                {approvedCount}
+              </p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400">
+              <CheckCircle2 size={18} />
+            </div>
+          </Card>
+
+          <Card className="bento-card p-4 flex items-center justify-between">
+            <div>
+              <p className="text-[11px] text-text-muted font-semibold uppercase tracking-wider">
+                Pending Sign-Off
+              </p>
+              <p className="text-2xl font-bold font-display text-amber-600 dark:text-amber-400 mt-0.5">
+                {pendingCount}
+              </p>
+            </div>
+            <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400">
+              <Clock size={18} />
+            </div>
+          </Card>
         </div>
 
-        {/* Summary strip */}
-        <div className="grid grid-cols-3 gap-4">
-          <Card variant="elevated">
-            <p className="text-xs text-text-muted uppercase tracking-wide">Total Consultations</p>
-            <p className="text-2xl font-bold font-display mt-1">{consultations.length}</p>
-          </Card>
-          <Card variant="elevated">
-            <p className="text-xs text-text-muted uppercase tracking-wide">Reports Approved</p>
-            <p className="text-2xl font-bold font-display mt-1 text-success">
-              {consultations.filter((c) => c.report_approved).length}
-            </p>
-          </Card>
-          <Card variant="elevated">
-            <p className="text-xs text-text-muted uppercase tracking-wide">Pending Review</p>
-            <p className="text-2xl font-bold font-display mt-1 text-warning">
-              {consultations.filter((c) => c.status === "REVIEW_PENDING").length}
-            </p>
-          </Card>
-        </div>
-
-        {/* Tab navigation */}
-        <div className="flex gap-1 p-1 bg-bg-base rounded-xl border border-border-default w-fit">
+        {/* Tab Navigation Pill Bar */}
+        <div className="flex gap-1.5 p-1 bg-bg-secondary rounded-2xl border border-border-default w-fit shadow-2xs">
           {TABS.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setTab(key)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 tab === key
-                  ? "bg-bg-secondary shadow-sm text-brand-primary border border-border-default"
-                  : "text-text-secondary hover:text-text-primary"
+                  ? "bg-brand-primary text-white shadow-xs"
+                  : "text-text-secondary hover:text-text-primary hover:bg-bg-surface-subtle"
               }`}
             >
-              <Icon size={15} />
-              {label}
+              <Icon size={14} />
+              <span>{label}</span>
               {key === "assistant" && (
-                <span className="text-xs px-1.5 py-0.5 rounded-full bg-brand-primary text-white font-mono leading-none">
-                  AI
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                    tab === key ? "bg-white/20 text-white" : "bg-brand-primary-light text-brand-primary"
+                  }`}
+                >
+                  RAG
                 </span>
               )}
             </button>
           ))}
         </div>
 
-        {/* ── Timeline tab ── */}
+        {/* ── Timeline Tab ── */}
         {tab === "timeline" && (
-          <Card>
-            <div className="flex items-center gap-2 mb-6">
-              <Clock size={18} className="text-text-secondary" />
-              <h2 className="text-lg font-display font-bold">Consultation History</h2>
-            </div>
-
+          <div className="space-y-4">
             {consultations.length === 0 ? (
-              <div className="py-12 text-center">
-                <FileText size={40} className="mx-auto text-border-strong mb-3" />
-                <p className="text-sm text-text-muted">No consultations on record for this patient.</p>
-              </div>
+              <Card className="bento-card text-center py-16">
+                <FileText size={40} className="mx-auto text-text-muted opacity-40 mb-3" />
+                <h2 className="text-base font-semibold text-text-primary">
+                  No Consultation History
+                </h2>
+                <p className="text-xs text-text-muted mt-1 max-w-sm mx-auto">
+                  No previous consultation records found for this patient.
+                </p>
+              </Card>
             ) : (
               <div className="relative">
-                {/* Vertical connector line */}
-                <div className="absolute left-[9px] top-3 bottom-3 w-px bg-border-default" />
+                {/* Vertical Timeline Guide Line */}
+                <div className="absolute left-[15px] top-6 bottom-6 w-0.5 bg-gradient-to-b from-emerald-500 via-brand-primary to-border-default pointer-events-none" />
 
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {consultations.map((c) => (
-                    <div key={c.consultation_id} className="flex gap-5">
-                      {/* Timeline dot */}
-                      <div className="relative z-10 mt-1 flex-shrink-0">
-                        {c.report_approved ? (
-                          <CheckCircle2 size={20} className="text-success" />
-                        ) : (
-                          <div className="w-5 h-5 rounded-full border-2 border-brand-primary bg-bg-secondary" />
-                        )}
+                    <div key={c.consultation_id} className="relative flex items-start gap-3.5 sm:gap-4 group">
+                      {/* Dot Anchor Centered on Line */}
+                      <div
+                        className={`relative z-10 w-8 h-8 rounded-full border-2 bg-bg-secondary flex items-center justify-center shrink-0 mt-3.5 shadow-xs transition-transform group-hover:scale-110 ${
+                          c.report_approved
+                            ? "border-emerald-500 text-emerald-500"
+                            : "border-brand-primary text-brand-primary"
+                        }`}
+                      >
+                        <div
+                          className={`w-2.5 h-2.5 rounded-full ${
+                            c.report_approved ? "bg-emerald-500" : "bg-brand-primary"
+                          }`}
+                        />
                       </div>
 
-                      {/* Content */}
-                      <div className="flex-1 pb-6">
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-                          <div>
-                            <div className="flex items-center gap-2 mb-1">
-                              <CalendarDays size={13} className="text-text-muted" />
-                              <span className="text-xs text-text-muted">{fmtDate(c.consultation_date)}</span>
+                      {/* Consultation Card */}
+                      <Card className="bento-card p-5 hover:border-brand-primary/40 flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                          <div className="space-y-2 flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="flex items-center gap-1.5 text-xs font-semibold text-text-primary bg-bg-base px-2.5 py-1 rounded-lg border border-border-subtle">
+                                <CalendarDays size={13} className="text-brand-primary" />
+                                {fmtDate(c.consultation_date)}
+                              </span>
+                              <Badge variant={statusVariant[c.status] ?? "secondary"} size="sm">
+                                {c.status.replace("_", " ")}
+                              </Badge>
                             </div>
-                            <p className="font-semibold text-sm">
-                              {c.chief_complaint || "No chief complaint recorded"}
+
+                            <p className="text-sm font-semibold text-text-primary">
+                              {c.chief_complaint || "Routine Clinical Consultation"}
                             </p>
+
                             {c.doctor_notes && (
-                              <p className="text-xs text-text-secondary mt-1 whitespace-pre-wrap">
+                              <p className="text-xs text-text-secondary leading-relaxed bg-bg-base/60 p-3 rounded-xl border border-border-subtle whitespace-pre-wrap">
                                 {c.doctor_notes}
                               </p>
                             )}
                           </div>
 
-                          <div className="flex items-center gap-2 flex-shrink-0">
-                            <Badge variant={statusVariant[c.status] ?? "secondary"} size="sm">
-                              {c.status.replace("_", " ")}
-                            </Badge>
-                            {c.report_id && c.report_approved && (
+                          <div className="shrink-0 flex items-center gap-2">
+                            {c.report_id && (
                               <Link to={`/doctor/reports/${c.report_id}`}>
-                                <Button variant="primary" className="text-xs py-1 px-3 h-auto">
-                                  View Report →
-                                </Button>
-                              </Link>
-                            )}
-                            {c.report_id && !c.report_approved && (
-                              <Link to={`/doctor/reports/${c.report_id}`}>
-                                <Button variant="secondary" className="text-xs py-1 px-3 h-auto">
-                                  Review →
+                                <Button
+                                  variant={c.report_approved ? "secondary" : "primary"}
+                                  size="sm"
+                                  className="h-8 px-3 text-xs gap-1"
+                                >
+                                  <span>{c.report_approved ? "View Notes" : "Review Draft"}</span>
+                                  <ArrowRight size={13} />
                                 </Button>
                               </Link>
                             )}
                           </div>
                         </div>
-                      </div>
+                      </Card>
                     </div>
                   ))}
                 </div>
               </div>
             )}
-          </Card>
+          </div>
         )}
 
-        {/* ── AI Assistant tab ── */}
+        {/* ── Grounded AI Assistant Tab ── */}
         {tab === "assistant" && (
           <PatientRAGAssistant
             patientId={patientId}
             patientName={history.patient_name}
           />
         )}
-
       </div>
     </DashboardLayout>
   );

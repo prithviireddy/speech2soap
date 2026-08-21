@@ -8,6 +8,15 @@ import {
   PanelLeftOpen,
   Plus,
   Trash2,
+  ArrowLeft,
+  Pill,
+  CalendarCheck,
+  AlertTriangle,
+  Sparkles,
+  Save,
+  Check,
+  ShieldCheck,
+  User,
 } from "lucide-react";
 
 import { DashboardLayout } from "../../layouts/DashboardLayout";
@@ -27,9 +36,7 @@ import {
   reindexPatientRAGAPI,
 } from "../../../api/doctor";
 
-
 /* ── Empty report shape ─────────────────────────────── */
-
 const createEmptyReport = () => ({
   soap: { subjective: [], objective: [], assessment: [], plan: [] },
   summary: "",
@@ -44,46 +51,87 @@ const createEmptyReport = () => ({
   },
 });
 
+const formatMedication = (m) => {
+  if (!m) return "";
+  if (typeof m === "string") return m;
+  const parts = [
+    m.name || m.medication,
+    m.dosage,
+    m.frequency,
+    m.duration ? `for ${m.duration}` : null,
+  ].filter(Boolean);
+  return parts.join(" - ") || JSON.stringify(m);
+};
+
+const formatDiagnosis = (d) => {
+  if (!d) return "";
+  if (typeof d === "string") return d;
+  if (d.name) {
+    return d.icd_code ? `${d.name} (${d.icd_code})` : d.name;
+  }
+  return typeof d === "object" ? JSON.stringify(d) : String(d);
+};
+
+const formatItem = (item) => {
+  if (item == null) return "";
+  if (typeof item === "string") return item;
+  if (typeof item === "object") {
+    if (item.dosage || item.frequency) return formatMedication(item);
+    if (item.name || item.icd_code) return formatDiagnosis(item);
+    return Object.values(item).filter(Boolean).join(" - ") || JSON.stringify(item);
+  }
+  return String(item);
+};
+
 const normalizeReport = (reportJson) => {
   const r = reportJson || {};
   const arr = (v) => (Array.isArray(v) ? v : []);
+  const strArr = (v) =>
+    arr(v)
+      .map((x) => formatItem(x))
+      .filter(Boolean);
+
   return {
     soap: {
-      subjective: arr(r.soap?.subjective),
-      objective:  arr(r.soap?.objective),
-      assessment: arr(r.soap?.assessment),
-      plan:       arr(r.soap?.plan),
+      subjective: strArr(r.soap?.subjective),
+      objective: strArr(r.soap?.objective),
+      assessment: strArr(r.soap?.assessment),
+      plan: strArr(r.soap?.plan),
     },
     summary: typeof r.summary === "string" ? r.summary : "",
     entities: {
-      duration:    arr(r.entities?.duration),
-      symptoms:    arr(r.entities?.symptoms),
-      diagnosis:   arr(r.entities?.diagnosis),
-      medications: arr(r.entities?.medications),
+      duration: strArr(r.entities?.duration),
+      symptoms: strArr(r.entities?.symptoms),
+      diagnosis: strArr(r.entities?.diagnosis),
+      medications: strArr(r.entities?.medications),
     },
     clinical_report: {
-      allergies:      arr(r.clinical_report?.allergies),
-      diagnosis:      arr(r.clinical_report?.diagnosis),
-      medications:    arr(r.clinical_report?.medications),
-      key_findings:   arr(r.clinical_report?.key_findings),
-      treatment_plan: arr(r.clinical_report?.treatment_plan),
-      follow_up_tasks: arr(r.clinical_report?.follow_up_tasks),
+      allergies: strArr(r.clinical_report?.allergies),
+      diagnosis: strArr(r.clinical_report?.diagnosis),
+      medications: strArr(r.clinical_report?.medications),
+      key_findings: strArr(r.clinical_report?.key_findings),
+      treatment_plan: strArr(r.clinical_report?.treatment_plan),
+      follow_up_tasks: strArr(r.clinical_report?.follow_up_tasks),
     },
   };
 };
 
-
 /* ── Sub-components ─────────────────────────────────── */
-
-const SectionTitle = ({ children }) => (
-  <div className="flex items-center gap-3 mb-5">
-    <div className="h-7 w-1 rounded-full gradient-accent-line" />
-    <h2 className="text-lg font-display font-bold">{children}</h2>
+const SectionTitle = ({ children, icon: Icon }) => (
+  <div className="flex items-center gap-2.5 mb-4 pb-2 border-b border-border-subtle">
+    {Icon && (
+      <div className="p-1.5 rounded-lg bg-brand-primary-light text-brand-primary">
+        <Icon size={16} />
+      </div>
+    )}
+    <h2 className="text-sm font-display font-bold text-text-primary tracking-tight">
+      {children}
+    </h2>
   </div>
 );
 
 const EmptyField = () => (
-  <p className="text-sm text-text-muted italic">No information documented.</p>
+  <p className="text-xs text-text-muted italic py-1">No information documented.</p>
 );
 
 const ReadOnlyList = ({ items }) => {
@@ -91,153 +139,168 @@ const ReadOnlyList = ({ items }) => {
   return (
     <ul className="space-y-2">
       {items.map((item, i) => (
-        <li key={i} className="flex items-start gap-3">
-          <span className="mt-2 h-1.5 w-1.5 rounded-full bg-brand-primary shrink-0" />
-          <span className="text-sm leading-relaxed">{item}</span>
+        <li key={i} className="flex items-start gap-2.5 text-xs text-text-secondary leading-relaxed">
+          <span className="mt-1.5 h-1.5 w-1.5 rounded-full bg-brand-primary shrink-0" />
+          <span>{formatItem(item)}</span>
         </li>
       ))}
     </ul>
   );
 };
 
-const ReadOnlyField = ({ label, items }) => (
-  <div>
-    <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide mb-2">{label}</h3>
-    <ReadOnlyList items={items} />
-  </div>
-);
+const EditableList = ({ items, onChange, placeholder = "Add entry..." }) => {
+  const [newItem, setNewItem] = useState("");
 
-const EditableList = ({ label, items, onChange, disabled }) => {
-  const update = (i, v) => { const u = [...items]; u[i] = v; onChange(u); };
-  const add    = ()     => onChange([...items, ""]);
-  const remove = (i)   => onChange(items.filter((_, j) => j !== i));
+  const handleAdd = () => {
+    const trimmed = newItem.trim();
+    if (!trimmed) return;
+    onChange([...(items || []), trimmed]);
+    setNewItem("");
+  };
+
+  const handleRemove = (index) => {
+    onChange((items || []).filter((_, i) => i !== index));
+  };
+
+  const handleEdit = (index, val) => {
+    const updated = [...(items || [])];
+    updated[index] = val;
+    onChange(updated);
+  };
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">{label}</h3>
-        {!disabled && (
+    <div className="space-y-2.5">
+      {(items || []).map((item, index) => (
+        <div
+          key={index}
+          className="relative flex items-start gap-2.5 p-3 rounded-xl border border-border-default bg-bg-base/70 focus-within:border-brand-primary focus-within:bg-bg-base hover:border-brand-primary/40 transition-all group"
+        >
+          <div className="w-1.5 h-1.5 rounded-full bg-brand-primary shrink-0 mt-2" />
+          <textarea
+            rows={Math.min(Math.max(Math.ceil((item?.length || 0) / 40), 1), 6)}
+            value={item}
+            onChange={(e) => handleEdit(index, e.target.value)}
+            className="flex-1 bg-transparent text-xs text-text-primary leading-relaxed resize-none focus:outline-none placeholder:text-text-muted"
+          />
           <button
             type="button"
-            onClick={add}
-            className="flex items-center gap-1 text-xs text-brand-primary hover:underline"
+            onClick={() => handleRemove(index)}
+            className="p-1 rounded-lg text-text-muted hover:text-danger hover:bg-danger-light/40 transition-colors opacity-40 group-hover:opacity-100 cursor-pointer shrink-0 mt-0.5"
+            title="Delete entry"
           >
-            <Plus size={13} /> Add
+            <Trash2 size={13} />
           </button>
-        )}
-      </div>
-      {items.length === 0 ? (
-        <p className="text-sm text-text-muted italic">No information documented.</p>
-      ) : (
-        <div className="space-y-2">
-          {items.map((item, i) => (
-            <div key={i} className="flex items-start gap-2">
-              <textarea
-                value={item}
-                onChange={(e) => update(i, e.target.value)}
-                disabled={disabled}
-                rows={2}
-                className="flex-1 px-3 py-2 text-sm border border-border-default rounded-lg bg-bg-base resize-y focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/20"
-              />
-              {!disabled && (
-                <button
-                  type="button"
-                  onClick={() => remove(i)}
-                  className="p-1.5 text-danger hover:bg-danger-light rounded-lg mt-0.5"
-                  title="Remove"
-                >
-                  <Trash2 size={15} />
-                </button>
-              )}
-            </div>
-          ))}
         </div>
-      )}
+      ))}
+
+      <div className="flex items-start gap-2 pt-1">
+        <textarea
+          rows={2}
+          value={newItem}
+          placeholder={placeholder}
+          onChange={(e) => setNewItem(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              handleAdd();
+            }
+          }}
+          className="flex-1 px-3.5 py-2 bg-bg-base border border-border-subtle rounded-xl text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/20 transition-all resize-none leading-relaxed"
+        />
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          onClick={handleAdd}
+          className="h-9 px-3 text-xs gap-1 shrink-0 mt-0.5"
+        >
+          <Plus size={13} />
+          <span>Add</span>
+        </Button>
+      </div>
     </div>
   );
 };
 
-
-/* ── Main component ─────────────────────────────────── */
-
 export const DoctorReportReview = () => {
   const { reportId } = useParams();
 
-  const [report,   setReport]   = useState(null);
-  const [formData, setFormData] = useState(createEmptyReport());
-  const [editMode, setEditMode] = useState(false);
+  const [report, setReport] = useState(null);
+  const [patient, setPatient] = useState(null);
+  const [consultationId, setConsultationId] = useState(null);
+  const [transcript, setTranscript] = useState(null);
 
-  const [loading,   setLoading]   = useState(true);
-  const [saving,    setSaving]    = useState(false);
+  const [isApproved, setIsApproved] = useState(false);
+  const [formData, setFormData] = useState(createEmptyReport());
+
+  const [loading, setLoading] = useState(true);
+  const [loadingTranscript, setLoadingTranscript] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [approving, setApproving] = useState(false);
 
-  const [error,   setError]   = useState("");
-  const [success, setSuccess] = useState("");
+  const [error, setError] = useState("");
+  const [successMsg, setSuccessMsg] = useState("");
+  const [showTranscript, setShowTranscript] = useState(true);
 
-  /* Transcript state */
-  const [showTranscript,    setShowTranscript]    = useState(false);
-  const [transcriptSegments, setTranscriptSegments] = useState([]);
-  const [transcriptLoading,  setTranscriptLoading]  = useState(false);
-  const [transcriptError,    setTranscriptError]    = useState("");
-  const [transcriptFetched,  setTranscriptFetched]  = useState(false);
-
-  useEffect(() => { fetchReport(); }, [reportId]);
+  useEffect(() => {
+    fetchReport();
+  }, [reportId]);
 
   const fetchReport = async () => {
     try {
       setLoading(true);
       setError("");
-      setSuccess("");
       const data = await getDoctorReportAPI(reportId);
+
       setReport(data);
-      setFormData(normalizeReport(data.report_json));
-      setEditMode(false);
+      setPatient({
+        id: data.patient_id,
+        name: data.patient_name,
+        patient_number: data.patient_number,
+      });
+      setConsultationId(data.consultation_id);
+      setIsApproved(Boolean(data.is_approved));
+
+      const normalized = normalizeReport(data.report_json);
+      setFormData(normalized);
+
+      if (data.consultation_id) {
+        fetchTranscript(data.consultation_id);
+      }
     } catch (err) {
-      setError(err?.response?.data?.detail || "Failed to load report.");
+      setError(err?.response?.data?.detail || "Failed to load clinical report.");
     } finally {
       setLoading(false);
     }
   };
 
-  /* Lazy-fetch transcript only on first toggle */
-  const handleTranscriptToggle = async () => {
-    const next = !showTranscript;
-    setShowTranscript(next);
-
-    if (next && !transcriptFetched && report) {
-      try {
-        setTranscriptLoading(true);
-        setTranscriptError("");
-        const data = await getConsultationTranscriptAPI(report.consultation_id);
-        setTranscriptSegments(data.segments ?? []);
-        setTranscriptFetched(true);
-      } catch (err) {
-        setTranscriptError(
-          err?.response?.data?.detail || "Transcript not available for this consultation."
-        );
-        setTranscriptFetched(true);
-      } finally {
-        setTranscriptLoading(false);
-      }
+  const fetchTranscript = async (cid) => {
+    try {
+      setLoadingTranscript(true);
+      const tData = await getConsultationTranscriptAPI(cid);
+      setTranscript(tData);
+    } catch (err) {
+      console.error("Transcript fetch error:", err);
+    } finally {
+      setLoadingTranscript(false);
     }
   };
 
-  /* Form helpers */
-  const updateSoap           = (f, v) => setFormData((p) => ({ ...p, soap:           { ...p.soap,           [f]: v } }));
-  const updateEntities       = (f, v) => setFormData((p) => ({ ...p, entities:       { ...p.entities,       [f]: v } }));
-  const updateClinicalReport = (f, v) => setFormData((p) => ({ ...p, clinical_report: { ...p.clinical_report, [f]: v } }));
-  const handleSummaryChange  = (e)    => setFormData((p) => ({ ...p, summary: e.target.value }));
+  const handleSoapChange = (section, newItems) => {
+    setFormData((prev) => ({
+      ...prev,
+      soap: { ...prev.soap, [section]: newItems },
+    }));
+  };
 
-  const handleSave = async () => {
+  const handleSaveDraft = async () => {
     try {
       setSaving(true);
       setError("");
-      setSuccess("");
-      const updated = await updateDoctorReportAPI(reportId, { report_json: formData });
-      setReport(updated);
-      setFormData(normalizeReport(updated.report_json));
-      setEditMode(false);
-      setSuccess("Report saved successfully.");
+      setSuccessMsg("");
+      await updateDoctorReportAPI(reportId, { report_json: formData });
+      setSuccessMsg("Draft notes saved successfully.");
+      setTimeout(() => setSuccessMsg(""), 4000);
     } catch (err) {
       setError(err?.response?.data?.detail || "Failed to save report.");
     } finally {
@@ -249,19 +312,15 @@ export const DoctorReportReview = () => {
     try {
       setApproving(true);
       setError("");
-      setSuccess("");
-      if (editMode) {
-        await updateDoctorReportAPI(reportId, { report_json: formData });
-      }
+      setSuccessMsg("");
+      await updateDoctorReportAPI(reportId, { report_json: formData });
       await approveDoctorReportAPI(reportId);
-      setReport((p) => ({ ...p, report_json: formData, is_approved: true }));
-      setEditMode(false);
-      setSuccess("Report approved — now visible to the patient.");
-
-      // Best-effort: rebuild RAG index so the new report is immediately retrievable.
-      // patient_id is already in the report state from the schema — no extra fetch needed.
-      if (report?.patient_id) {
-        reindexPatientRAGAPI(report.patient_id).catch(() => {});
+      setIsApproved(true);
+      setSuccessMsg("Clinical report approved and signed off successfully!");
+      if (patient?.id) {
+        reindexPatientRAGAPI(patient.id).catch((e) =>
+          console.warn("RAG index sync warning:", e)
+        );
       }
     } catch (err) {
       setError(err?.response?.data?.detail || "Failed to approve report.");
@@ -270,231 +329,300 @@ export const DoctorReportReview = () => {
     }
   };
 
-  const handleCancelEdit = () => {
-    if (!report) return;
-    setFormData(normalizeReport(report.report_json));
-    setEditMode(false);
-    setError("");
-  };
-
-  /* Guards */
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex justify-center py-20"><LoadingSpinner /></div>
+        <div className="flex justify-center items-center py-24">
+          <LoadingSpinner />
+        </div>
       </DashboardLayout>
     );
   }
+
   if (error && !report) {
     return (
       <DashboardLayout>
-        <Card>
-          <p className="text-danger">{error}</p>
-          <Button variant="secondary" onClick={fetchReport} className="mt-4">Try Again</Button>
+        <Card className="bento-card border-danger/30 bg-danger-light/20 p-6 text-center max-w-lg mx-auto mt-12">
+          <p className="text-danger text-sm font-medium">{error}</p>
+          <Button variant="secondary" onClick={fetchReport} className="mt-4">
+            Try Again
+          </Button>
         </Card>
       </DashboardLayout>
     );
   }
-  if (!report) return null;
-
-  const readOnly = report.is_approved || !editMode;
 
   return (
     <DashboardLayout>
-      <div className="max-w-7xl mx-auto space-y-6 animate-fade-in-up">
+      <div className="space-y-6 animate-fade-in-up pb-24">
+        {/* Top Breadcrumb & Controls */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <Link
+            to="/doctor/reports"
+            className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-brand-primary transition-colors cursor-pointer"
+          >
+            <ArrowLeft size={14} />
+            <span>Back to All Reports</span>
+          </Link>
 
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-          <div>
-            <h1 className="text-4xl font-display font-bold">Report Review</h1>
-            <p className="text-text-secondary mt-1">
-              {report.is_approved
-                ? "This report has been approved and is visible to the patient."
-                : "Review the AI-generated clinical report before approving."}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3 flex-shrink-0">
-            {/* Transcript toggle (only when not approved — approved reports show for history) */}
-            <Button
-              variant="secondary"
-              onClick={handleTranscriptToggle}
-              className="flex items-center gap-2 text-sm"
-            >
-              {showTranscript ? <PanelLeftClose size={16} /> : <PanelLeftOpen size={16} />}
-              {showTranscript ? "Hide" : "Show"} Transcript
-            </Button>
-
-            <Badge variant={report.is_approved ? "success" : "warning"}>
-              <span className="flex items-center gap-1.5">
-                {report.is_approved && <CheckCircle2 size={14} />}
-                {report.is_approved ? "APPROVED" : "REVIEW PENDING"}
-              </span>
-            </Badge>
-          </div>
+          <button
+            onClick={() => setShowTranscript((prev) => !prev)}
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border border-border-default bg-bg-secondary hover:bg-bg-surface-subtle text-xs text-text-secondary font-medium transition-colors cursor-pointer self-start sm:self-auto shadow-2xs"
+          >
+            {showTranscript ? <PanelLeftClose size={14} /> : <PanelLeftOpen size={14} />}
+            <span>{showTranscript ? "Hide Transcript" : "Show Transcript"}</span>
+          </button>
         </div>
 
-        {/* Alerts */}
-        {error   && <div className="p-4 rounded-xl bg-danger-light border border-danger/20 text-sm text-danger">{error}</div>}
-        {success && <div className="p-4 rounded-xl bg-success-light border border-success/20 text-sm text-success">{success}</div>}
-
-        {/* Split layout when transcript is open */}
-        <div className={showTranscript ? "grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 items-start" : ""}>
-
-          {/* Transcript panel */}
-          {showTranscript && (
-            <div className="lg:sticky lg:top-20">
-              <Card variant="elevated">
-                <div className="flex items-center gap-2 mb-4">
-                  <MessageSquareText size={18} className="text-brand-primary" />
-                  <h2 className="font-display font-bold">Consultation Transcript</h2>
+        {/* Patient Profile Header Card */}
+        <Card className="bento-card p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-2xl bg-brand-primary text-white shadow-md shadow-brand-primary/25 flex items-center justify-center font-display font-bold text-xl shrink-0">
+                {patient?.name
+                  ? patient.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .slice(0, 2)
+                      .join("")
+                      .toUpperCase()
+                  : "PT"}
+              </div>
+              <div>
+                <div className="flex items-center gap-2.5">
+                  <h1 className="text-xl sm:text-2xl font-display font-bold text-text-primary">
+                    {patient?.name || report?.patient_name}
+                  </h1>
+                  <Badge variant={isApproved ? "success" : "warning"} size="sm">
+                    {isApproved ? "Approved & Signed" : "Draft Sign-Off Pending"}
+                  </Badge>
                 </div>
-                <p className="text-xs text-text-muted mb-4">
-                  Speaker-attributed conversation that generated this report.
+                <p className="text-xs text-text-muted font-mono mt-0.5">
+                  Record ID: {patient?.patient_number || "PATIENT RECORD"}
                 </p>
-                <TranscriptPanel
-                  segments={transcriptSegments}
-                  loading={transcriptLoading}
-                  error={transcriptError}
-                />
-              </Card>
+              </div>
+            </div>
+
+            {patient?.id && (
+              <Link to={`/doctor/patients/${patient.id}/history`}>
+                <Button variant="secondary" size="sm" className="gap-1.5 text-xs self-start sm:self-auto">
+                  <User size={14} />
+                  <span>Patient History & RAG</span>
+                </Button>
+              </Link>
+            )}
+          </div>
+        </Card>
+
+        {/* Feedback Alerts */}
+        {error && (
+          <div className="p-4 rounded-xl bg-danger-light/60 border border-danger/30 text-danger text-xs font-medium flex items-center gap-2">
+            <AlertTriangle size={15} />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {successMsg && (
+          <div className="p-4 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-300 text-xs font-medium flex items-center gap-2">
+            <CheckCircle2 size={15} />
+            <span>{successMsg}</span>
+          </div>
+        )}
+
+        {/* Main Content Layout: SOAP Notes vs Transcript Drawer */}
+        <div
+          className={`grid gap-6 transition-all duration-300 ${
+            showTranscript ? "grid-cols-1 lg:grid-cols-12" : "grid-cols-1"
+          }`}
+        >
+          {/* Transcript Panel (Left Drawer if active) */}
+          {showTranscript && (
+            <div className="lg:col-span-4 space-y-4">
+              <TranscriptPanel
+                transcript={transcript}
+                segments={transcript?.segments}
+                loading={loadingTranscript}
+              />
             </div>
           )}
 
-          {/* Report content */}
-          <div className="space-y-6">
-
-            {/* Clinical Summary */}
-            <Card>
-              <SectionTitle>Clinical Summary</SectionTitle>
-              {readOnly ? (
-                formData.summary
-                  ? <p className="leading-7 text-sm">{formData.summary}</p>
-                  : <EmptyField />
+          {/* Clinical SOAP Report (Main / Right) */}
+          <div className={`space-y-6 ${showTranscript ? "lg:col-span-8" : "w-full"}`}>
+            {/* Executive Clinical Summary */}
+            <Card className="bento-card p-6 space-y-3">
+              <SectionTitle icon={FileText}>Executive Clinical Summary</SectionTitle>
+              {isApproved ? (
+                <p className="text-xs text-text-secondary leading-relaxed bg-bg-base/60 p-3.5 rounded-xl border border-border-subtle">
+                  {formData.summary || <EmptyField />}
+                </p>
               ) : (
                 <textarea
+                  rows={3}
                   value={formData.summary}
-                  onChange={handleSummaryChange}
-                  rows={5}
-                  className="w-full px-4 py-3 text-sm border border-border-default rounded-lg bg-bg-base resize-y focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/20"
-                  placeholder="Enter clinical summary..."
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, summary: e.target.value }))
+                  }
+                  placeholder="Enter high-level clinical summary..."
+                  className="w-full px-3.5 py-2.5 bg-bg-base border border-border-default rounded-xl text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/20 transition-all"
                 />
               )}
             </Card>
 
-            {/* SOAP Notes */}
-            <Card>
-              <SectionTitle>SOAP Notes</SectionTitle>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                {readOnly ? (
-                  <>
-                    <ReadOnlyField label="Subjective"  items={formData.soap.subjective} />
-                    <ReadOnlyField label="Objective"   items={formData.soap.objective} />
-                    <ReadOnlyField label="Assessment"  items={formData.soap.assessment} />
-                    <ReadOnlyField label="Plan"        items={formData.soap.plan} />
-                  </>
+            {/* Structured SOAP Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Subjective */}
+              <Card className="bento-card p-5 space-y-3">
+                <SectionTitle>Subjective (S)</SectionTitle>
+                {isApproved ? (
+                  <ReadOnlyList items={formData.soap.subjective} />
                 ) : (
-                  <>
-                    <EditableList label="Subjective"  items={formData.soap.subjective}  onChange={(v) => updateSoap("subjective", v)}  disabled={false} />
-                    <EditableList label="Objective"   items={formData.soap.objective}   onChange={(v) => updateSoap("objective", v)}   disabled={false} />
-                    <EditableList label="Assessment"  items={formData.soap.assessment}  onChange={(v) => updateSoap("assessment", v)}  disabled={false} />
-                    <EditableList label="Plan"        items={formData.soap.plan}        onChange={(v) => updateSoap("plan", v)}        disabled={false} />
-                  </>
+                  <EditableList
+                    items={formData.soap.subjective}
+                    onChange={(items) => handleSoapChange("subjective", items)}
+                    placeholder="Add patient symptom/history..."
+                  />
                 )}
-              </div>
-            </Card>
+              </Card>
 
-            {/* Clinical Report */}
-            <Card>
-              <SectionTitle>Clinical Report</SectionTitle>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                {readOnly ? (
-                  <>
-                    <ReadOnlyField label="Key Findings"   items={formData.clinical_report.key_findings} />
-                    <ReadOnlyField label="Diagnosis"      items={formData.clinical_report.diagnosis} />
-                    <ReadOnlyField label="Medications"    items={formData.clinical_report.medications} />
-                    <ReadOnlyField label="Allergies"      items={formData.clinical_report.allergies} />
-                    <ReadOnlyField label="Treatment Plan" items={formData.clinical_report.treatment_plan} />
-                    <ReadOnlyField label="Follow-up"      items={formData.clinical_report.follow_up_tasks} />
-                  </>
+              {/* Objective */}
+              <Card className="bento-card p-5 space-y-3">
+                <SectionTitle>Objective (O)</SectionTitle>
+                {isApproved ? (
+                  <ReadOnlyList items={formData.soap.objective} />
                 ) : (
-                  <>
-                    <EditableList label="Key Findings"   items={formData.clinical_report.key_findings}   onChange={(v) => updateClinicalReport("key_findings", v)}   disabled={false} />
-                    <EditableList label="Diagnosis"      items={formData.clinical_report.diagnosis}      onChange={(v) => updateClinicalReport("diagnosis", v)}      disabled={false} />
-                    <EditableList label="Medications"    items={formData.clinical_report.medications}    onChange={(v) => updateClinicalReport("medications", v)}    disabled={false} />
-                    <EditableList label="Allergies"      items={formData.clinical_report.allergies}      onChange={(v) => updateClinicalReport("allergies", v)}      disabled={false} />
-                    <EditableList label="Treatment Plan" items={formData.clinical_report.treatment_plan} onChange={(v) => updateClinicalReport("treatment_plan", v)} disabled={false} />
-                    <EditableList label="Follow-up"      items={formData.clinical_report.follow_up_tasks} onChange={(v) => updateClinicalReport("follow_up_tasks", v)} disabled={false} />
-                  </>
+                  <EditableList
+                    items={formData.soap.objective}
+                    onChange={(items) => handleSoapChange("objective", items)}
+                    placeholder="Add vitals / exam finding..."
+                  />
                 )}
-              </div>
-            </Card>
+              </Card>
 
-            {/* Extracted Entities */}
-            <Card>
-              <SectionTitle>Extracted Entities</SectionTitle>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                {readOnly ? (
-                  <>
-                    <ReadOnlyField label="Symptoms"    items={formData.entities.symptoms} />
-                    <ReadOnlyField label="Duration"    items={formData.entities.duration} />
-                    <ReadOnlyField label="Diagnosis"   items={formData.entities.diagnosis} />
-                    <ReadOnlyField label="Medications" items={formData.entities.medications} />
-                  </>
+              {/* Assessment */}
+              <Card className="bento-card p-5 space-y-3">
+                <SectionTitle>Assessment (A)</SectionTitle>
+                {isApproved ? (
+                  <ReadOnlyList items={formData.soap.assessment} />
                 ) : (
-                  <>
-                    <EditableList label="Symptoms"    items={formData.entities.symptoms}    onChange={(v) => updateEntities("symptoms", v)}    disabled={false} />
-                    <EditableList label="Duration"    items={formData.entities.duration}    onChange={(v) => updateEntities("duration", v)}    disabled={false} />
-                    <EditableList label="Diagnosis"   items={formData.entities.diagnosis}   onChange={(v) => updateEntities("diagnosis", v)}   disabled={false} />
-                    <EditableList label="Medications" items={formData.entities.medications} onChange={(v) => updateEntities("medications", v)} disabled={false} />
-                  </>
+                  <EditableList
+                    items={formData.soap.assessment}
+                    onChange={(items) => handleSoapChange("assessment", items)}
+                    placeholder="Add clinical diagnosis / reasoning..."
+                  />
                 )}
-              </div>
-            </Card>
+              </Card>
 
-            {/* Actions */}
-            <Card>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Link to={`/doctor/consultations/${report.consultation_id}`} className="flex-1">
-                  <Button variant="secondary" className="w-full">
-                    ← Back to Consultation
-                  </Button>
-                </Link>
-
-                {!report.is_approved && !editMode && (
-                  <Button
-                    variant="secondary"
-                    onClick={() => { setError(""); setSuccess(""); setEditMode(true); }}
-                    className="flex-1"
-                  >
-                    Edit Report
-                  </Button>
+              {/* Plan */}
+              <Card className="bento-card p-5 space-y-3">
+                <SectionTitle>Plan (P)</SectionTitle>
+                {isApproved ? (
+                  <ReadOnlyList items={formData.soap.plan} />
+                ) : (
+                  <EditableList
+                    items={formData.soap.plan}
+                    onChange={(items) => handleSoapChange("plan", items)}
+                    placeholder="Add treatment / medication / follow-up..."
+                  />
                 )}
+              </Card>
+            </div>
 
-                {!report.is_approved && editMode && (
-                  <>
-                    <Button variant="secondary" onClick={handleCancelEdit} disabled={saving || approving} className="flex-1">
-                      Cancel
-                    </Button>
-                    <Button variant="secondary" onClick={handleSave} disabled={saving || approving} className="flex-1">
-                      {saving ? "Saving…" : "Save Changes"}
-                    </Button>
-                  </>
+            {/* Prescriptions & Follow-ups */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Card className="bento-card p-5 space-y-3">
+                <SectionTitle icon={Pill}>Prescribed Medications</SectionTitle>
+                {isApproved ? (
+                  <ReadOnlyList items={formData.clinical_report.medications} />
+                ) : (
+                  <EditableList
+                    items={formData.clinical_report.medications}
+                    onChange={(items) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        clinical_report: {
+                          ...prev.clinical_report,
+                          medications: items,
+                        },
+                      }))
+                    }
+                    placeholder="e.g. Lisinopril 10mg PO daily"
+                  />
                 )}
+              </Card>
 
-                {!report.is_approved && (
-                  <Button
-                    variant="primary"
-                    onClick={handleApprove}
-                    disabled={saving || approving}
-                    className="flex-1"
-                  >
-                    {approving ? "Approving…" : "Approve Report"}
-                  </Button>
+              <Card className="bento-card p-5 space-y-3">
+                <SectionTitle icon={CalendarCheck}>Follow-Up & Next Steps</SectionTitle>
+                {isApproved ? (
+                  <ReadOnlyList items={formData.clinical_report.follow_up_tasks} />
+                ) : (
+                  <EditableList
+                    items={formData.clinical_report.follow_up_tasks}
+                    onChange={(items) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        clinical_report: {
+                          ...prev.clinical_report,
+                          follow_up_tasks: items,
+                        },
+                      }))
+                    }
+                    placeholder="e.g. Return for BP check in 2 weeks"
+                  />
                 )}
-              </div>
-            </Card>
+              </Card>
+            </div>
+          </div>
+        </div>
 
+        {/* Floating Bottom Action Bar for Review & Sign-Off */}
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-bg-secondary/90 backdrop-blur-xl border-t border-border-default py-3.5 px-6 shadow-xl">
+          <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <ShieldCheck size={18} className="text-brand-primary shrink-0" />
+              <span className="text-xs text-text-secondary hidden sm:inline font-medium">
+                {isApproved
+                  ? "Report verified & signed into official medical record"
+                  : "Review notes before final physician sign-off"}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {!isApproved && (
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleSaveDraft}
+                  disabled={saving || approving}
+                  className="gap-1.5 text-xs"
+                >
+                  <Save size={14} />
+                  <span>{saving ? "Saving..." : "Save Draft"}</span>
+                </Button>
+              )}
+
+              <Button
+                type="button"
+                variant="primary"
+                size="sm"
+                onClick={handleApprove}
+                disabled={isApproved || approving || saving}
+                className={`gap-1.5 text-xs px-4 ${
+                  isApproved
+                    ? "bg-emerald-600 hover:bg-emerald-600 text-white cursor-default"
+                    : "shadow-md shadow-brand-primary/25"
+                }`}
+              >
+                <Check size={14} />
+                <span>
+                  {approving
+                    ? "Signing off..."
+                    : isApproved
+                    ? "Approved & Verified"
+                    : "Approve & Sign-Off"}
+                </span>
+              </Button>
+            </div>
           </div>
         </div>
       </div>
