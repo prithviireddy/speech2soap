@@ -1,3 +1,5 @@
+from src.models.patient import Patient
+import json
 import shutil
 import uuid
 from pathlib import Path
@@ -15,6 +17,10 @@ from src.schemas.doctor import (
     DoctorConsultationListItem,
     DoctorConsultationRead,
     DoctorConsultationStatusRead,
+    DoctorConsultationTranscriptRead,
+    DoctorTranscriptSegment,
+    DoctorPatientHistoryRead,
+    DoctorPatientHistoryItem,
     DoctorReportListItem,
     DoctorReportRead,
     DoctorReportUpdate,
@@ -45,7 +51,14 @@ class DoctorService:
         )
 
         return [
-            DoctorAppointmentListItem.model_validate(appointment)
+            DoctorAppointmentListItem(
+                id=appointment.id,
+                patient_id=appointment.patient_id,
+                patient_name=appointment.patient.full_name,
+                scheduled_at=appointment.scheduled_at,
+                status=appointment.status,
+                reason=appointment.reason,
+            )
             for appointment in appointments
         ]
 
@@ -67,6 +80,66 @@ class DoctorService:
             raise PermissionError("You are not authorized to access this appointment.")
 
         return DoctorAppointmentDetails.model_validate(appointment)
+
+    def get_patient_history(
+        self,
+        doctor_id: uuid.UUID,
+        patient_id: uuid.UUID,
+    ) -> DoctorPatientHistoryRead:
+
+        patient = self.db.get(
+            Patient,
+            patient_id,
+        )
+
+        if patient is None:
+            raise ValueError("Patient not found.")
+
+        consultations = (
+            self.db.execute(
+                select(Consultation)
+                .where(
+                    Consultation.doctor_id == doctor_id,
+                    Consultation.patient_id == patient_id,
+                )
+                .order_by(
+                    Consultation.created_at.desc(),
+                )
+            )
+            .scalars()
+            .all()
+        )
+
+        history = []
+
+        for consultation in consultations:
+
+            report_id = None
+            report_approved = None
+
+            if consultation.report is not None:
+                report_id = consultation.report.id
+                report_approved = consultation.report.is_approved
+
+            history.append(
+               DoctorPatientHistoryItem(
+                    consultation_id=consultation.id,
+                    appointment_id=consultation.appointment_id,
+                    report_id=report_id,
+                    consultation_date=consultation.created_at,
+                    chief_complaint=consultation.chief_complaint,
+                    doctor_notes=consultation.doctor_notes,
+                    status=consultation.status,
+                    report_approved=report_approved,
+                )
+            )
+
+        return DoctorPatientHistoryRead(
+            patient_id=patient.id,
+            patient_name=patient.full_name,
+            patient_number=patient.patient_number,
+            consultations=history,
+        )
 
     def upload_consultation(
         self,
@@ -219,6 +292,50 @@ class DoctorService:
             report_id=report_id,
         )
 
+    def get_consultation_transcript(
+        self,
+        doctor_id: uuid.UUID,
+        consultation_id: uuid.UUID,
+    ) -> DoctorConsultationTranscriptRead:
+
+        consultation = self.db.get(
+            Consultation,
+            consultation_id,
+        )
+
+        if consultation is None:
+            raise ValueError("Consultation not found.")
+
+        if consultation.doctor_id != doctor_id:
+            raise PermissionError("You are not authorized to access this consultation.")
+
+        if not consultation.transcript_path:
+            raise ValueError("Transcript is not available yet for this consultation.")
+
+        transcript_file = Path(consultation.transcript_path)
+
+        if not transcript_file.exists():
+            raise ValueError("Transcript file not found on disk.")
+
+        with open(transcript_file, "r", encoding="utf-8") as f:
+            raw_segments = json.load(f)
+
+        segments = [
+            DoctorTranscriptSegment(
+                speaker=seg.get("speaker", "UNKNOWN"),
+                text=seg.get("text", ""),
+                start=seg.get("start"),
+                end=seg.get("end"),
+            )
+            for seg in raw_segments
+            if seg.get("text", "").strip()
+        ]
+
+        return DoctorConsultationTranscriptRead(
+            consultation_id=consultation.id,
+            segments=segments,
+        )
+
     def list_reports(
         self,
         doctor_id: uuid.UUID,
@@ -270,6 +387,7 @@ class DoctorService:
         return DoctorReportRead(
             id=report.id,
             consultation_id=report.consultation_id,
+            patient_id=report.consultation.patient_id,
             is_approved=report.is_approved,
             report_json=report.report_json,
             created_at=report.created_at,
@@ -305,6 +423,7 @@ class DoctorService:
         return DoctorReportRead(
             id=report.id,
             consultation_id=report.consultation_id,
+            patient_id=report.consultation.patient_id,
             is_approved=report.is_approved,
             report_json=report.report_json,
             created_at=report.created_at,

@@ -68,6 +68,7 @@ class ConsultationService:
             consultation.progress = 100
             consultation.current_stage = "Completed"
             consultation.status = ConsultationStatus.REVIEW_PENDING
+            consultation.transcript_path = str(merged_path)
             
             appointment.status = AppointmentStatus.COMPLETED
             db.commit()

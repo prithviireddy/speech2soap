@@ -227,4 +227,9 @@ def update_appointment(appointment_id: uuid.UUID, payload: AppointmentUpdate,db:
             detail= str(exc)
         )
 
-    
+
+@router.get("/stats")
+def get_stats(db: Session = Depends(get_db)):
+    service = AdminService(db)
+    return service.get_stats()
+

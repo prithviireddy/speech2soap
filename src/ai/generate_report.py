@@ -128,7 +128,7 @@ Conversation:
 
     # Generate clinical report
     response = client.models.generate_content(
-        model="gemini-3.1-flash-lite",
+        model="gemini-2.0-flash-lite",
         contents=f"{SYSTEM_PROMPT}\n\n{USER_PROMPT}",
     )
 

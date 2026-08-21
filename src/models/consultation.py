@@ -101,6 +101,11 @@ class Consultation(Base, UUIDMixin, TimestampMixin):
         nullable=True,
     )
 
+    transcript_path: Mapped[str | None] = mapped_column(
+        String,
+        nullable=True,
+    )
+
     followups = relationship(
         "Followup",
         back_populates="consultation",

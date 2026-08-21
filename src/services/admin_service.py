@@ -3,12 +3,14 @@ from datetime import datetime, timedelta
 from typing import Sequence
 from zoneinfo import ZoneInfo
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.orm import Session
 
 from src.models.appointment import Appointment, AppointmentStatus
+from src.models.consultation import Consultation
 from src.models.doctor import Doctor
 from src.models.patient import Patient
+from src.models.report import Report
 from src.models.user import User, UserRole
 from src.schemas.appointment import (
     AppointmentCreate,
@@ -317,3 +319,20 @@ class AdminService:
                 return True
 
         return False
+
+    def get_stats(self) -> dict:
+        total_doctors = self.db.scalar(select(func.count(Doctor.id)))
+        total_patients = self.db.scalar(select(func.count(Patient.id)))
+        total_appointments = self.db.scalar(select(func.count(Appointment.id)))
+        total_consultations = self.db.scalar(select(func.count(Consultation.id)))
+        pending_reviews = self.db.scalar(
+            select(func.count(Report.id)).where(Report.is_approved == False)
+        )
+
+        return {
+            "total_doctors": total_doctors or 0,
+            "total_patients": total_patients or 0,
+            "total_appointments": total_appointments or 0,
+            "total_consultations": total_consultations or 0,
+            "pending_reviews": pending_reviews or 0,
+        }

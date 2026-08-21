@@ -9,6 +9,18 @@ from .consultation import ConsultationStatus
 from .user import UserRead
 
 
+class DoctorTranscriptSegment(BaseSchema):
+    speaker: str
+    text: str
+    start: float | None = None
+    end: float | None = None
+
+
+class DoctorConsultationTranscriptRead(BaseSchema):
+    consultation_id: UUID
+    segments: list[DoctorTranscriptSegment]
+
+
 class DoctorRegistration(BaseSchema):
     email: EmailStr
     password: str = Field(
@@ -60,6 +72,7 @@ class DoctorDetails(BaseSchema):
 
 class DoctorAppointmentListItem(BaseSchema):
     id: UUID
+    patient_id: UUID
     patient_name: str
     scheduled_at: datetime
     status: AppointmentStatus
@@ -68,6 +81,7 @@ class DoctorAppointmentListItem(BaseSchema):
 
 class DoctorAppointmentDetails(TimestampSchema):
     id: UUID
+    patient_id: UUID
     patient_name: str
     scheduled_at: datetime
     duration_minutes: int = Field(
@@ -118,6 +132,7 @@ class DoctorReportRead(TimestampSchema):
 
     id: UUID
     consultation_id: UUID
+    patient_id: UUID
     is_approved: bool
     report_json: dict
 
@@ -125,3 +140,25 @@ class DoctorReportRead(TimestampSchema):
 class DoctorReportUpdate(BaseSchema):
 
     report_json: dict
+
+class DoctorPatientHistoryItem(BaseSchema):
+    consultation_id: UUID
+    appointment_id: UUID
+    report_id: UUID | None = None
+
+    consultation_date: datetime
+
+    chief_complaint: str | None = None
+    doctor_notes: str | None = None
+
+    status: ConsultationStatus
+
+    report_approved: bool | None = None
+
+
+class DoctorPatientHistoryRead(BaseSchema):
+    patient_id: UUID
+    patient_name: str
+    patient_number: str
+
+    consultations: list[DoctorPatientHistoryItem]
