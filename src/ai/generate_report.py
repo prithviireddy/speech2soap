@@ -97,8 +97,8 @@ def clean_text(text):
     return text.strip()
 
 
-def generate_clinical_report(transcript_path: Path) -> Path:
-
+def generate_clinical_report(transcript_path: Path | str) -> dict:
+    transcript_path = Path(transcript_path)
     print(f"Generating report: {transcript_path.name}")
 
     # Load merged transcript
@@ -128,7 +128,7 @@ Conversation:
 
     # Generate clinical report
     response = client.models.generate_content(
-        model="gemini-2.0-flash-lite",
+        model="gemini-2.5-flash",
         contents=f"{SYSTEM_PROMPT}\n\n{USER_PROMPT}",
     )
 
@@ -137,15 +137,15 @@ Conversation:
 
     raw_text = response.text.strip()
 
-    # Remove markdown fences if model adds them
-    raw_text = raw_text.replace("```json", "")
-    raw_text = raw_text.replace("```", "")
-    raw_text = raw_text.strip()
+    # Robust JSON block extraction
+    if "```json" in raw_text:
+        raw_text = raw_text.split("```json")[1].split("```")[0].strip()
+    elif "```" in raw_text:
+        raw_text = raw_text.split("```")[1].split("```")[0].strip()
+    else:
+        raw_text = raw_text.strip()
 
     # Parse JSON
     clinical_output = json.loads(raw_text)
-
-    # Optional rate limit safety
-    # time.sleep(1)
 
     return clinical_output

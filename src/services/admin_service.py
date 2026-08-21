@@ -336,3 +336,21 @@ class AdminService:
             "total_consultations": total_consultations or 0,
             "pending_reviews": pending_reviews or 0,
         }
+
+    def delete_appointment(self, appointment_id: uuid.UUID) -> None:
+        appointment = self.db.get(Appointment, appointment_id)
+        if appointment is None:
+            raise ValueError("Appointment not found")
+
+        if appointment.consultation:
+            if appointment.consultation.audio_file_path:
+                try:
+                    audio_p = Path(appointment.consultation.audio_file_path)
+                    if audio_p.exists():
+                        audio_p.unlink(missing_ok=True)
+                except Exception:
+                    pass
+            self.db.delete(appointment.consultation)
+
+        self.db.delete(appointment)
+        self.db.commit()

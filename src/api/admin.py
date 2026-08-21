@@ -233,3 +233,22 @@ def get_stats(db: Session = Depends(get_db)):
     service = AdminService(db)
     return service.get_stats()
 
+
+@router.delete(
+    "/appointments/{appointment_id}",
+    status_code=status.HTTP_200_OK,
+)
+def delete_appointment(
+    appointment_id: uuid.UUID,
+    db: Session = Depends(get_db),
+):
+    service = AdminService(db)
+    try:
+        service.delete_appointment(appointment_id)
+        return {"message": "Appointment deleted successfully."}
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+

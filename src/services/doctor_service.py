@@ -309,13 +309,29 @@ class DoctorService:
         if consultation.doctor_id != doctor_id:
             raise PermissionError("You are not authorized to access this consultation.")
 
-        if not consultation.transcript_path:
+        transcript_file = None
+        if consultation.transcript_path:
+            p = Path(consultation.transcript_path)
+            if p.exists():
+                transcript_file = p
+
+        if not transcript_file and consultation.audio_file_path:
+            audio_stem = Path(consultation.audio_file_path).stem
+            candidate_paths = [
+                Path("data/processed/merged_transcripts") / f"{audio_stem}.json",
+                Path("src/data/processed/merged_transcripts") / f"{audio_stem}.json",
+                Path("data/processed/diarized_transcripts") / f"{audio_stem}.json",
+                Path("src/data/processed/diarized_transcripts") / f"{audio_stem}.json",
+            ]
+            for cand in candidate_paths:
+                if cand.exists():
+                    transcript_file = cand
+                    consultation.transcript_path = str(cand)
+                    self.db.commit()
+                    break
+
+        if not transcript_file:
             raise ValueError("Transcript is not available yet for this consultation.")
-
-        transcript_file = Path(consultation.transcript_path)
-
-        if not transcript_file.exists():
-            raise ValueError("Transcript file not found on disk.")
 
         with open(transcript_file, "r", encoding="utf-8") as f:
             raw_segments = json.load(f)
@@ -388,6 +404,8 @@ class DoctorService:
             id=report.id,
             consultation_id=report.consultation_id,
             patient_id=report.consultation.patient_id,
+            patient_name=report.consultation.patient.full_name,
+            patient_number=report.consultation.patient.patient_number,
             is_approved=report.is_approved,
             report_json=report.report_json,
             created_at=report.created_at,
@@ -454,5 +472,62 @@ class DoctorService:
 
         report.consultation.status = ConsultationStatus.APPROVED
 
+        self.db.commit()
+
+    def delete_consultation(
+        self,
+        doctor_id: uuid.UUID,
+        consultation_id: uuid.UUID,
+    ) -> None:
+        consultation = self.db.get(Consultation, consultation_id)
+        if consultation is None:
+            raise ValueError("Consultation not found.")
+
+        if consultation.doctor_id != doctor_id:
+            raise PermissionError("You are not authorized to delete this consultation.")
+
+        # Remove audio file from disk if present
+        if consultation.audio_file_path:
+            try:
+                audio_p = Path(consultation.audio_file_path)
+                if audio_p.exists():
+                    audio_p.unlink(missing_ok=True)
+            except Exception:
+                pass
+
+        # Reset appointment status back to SCHEDULED if it was IN_PROGRESS
+        if consultation.appointment and consultation.appointment.status in (
+            AppointmentStatus.IN_PROGRESS,
+            AppointmentStatus.COMPLETED,
+        ):
+            consultation.appointment.status = AppointmentStatus.SCHEDULED
+
+        self.db.delete(consultation)
+        self.db.commit()
+
+    def delete_appointment(
+        self,
+        doctor_id: uuid.UUID,
+        appointment_id: uuid.UUID,
+    ) -> None:
+        appointment = self.db.get(Appointment, appointment_id)
+        if appointment is None:
+            raise ValueError("Appointment not found.")
+
+        if appointment.doctor_id != doctor_id:
+            raise PermissionError("You are not authorized to delete this appointment.")
+
+        # If consultation exists, delete it first
+        if appointment.consultation:
+            if appointment.consultation.audio_file_path:
+                try:
+                    audio_p = Path(appointment.consultation.audio_file_path)
+                    if audio_p.exists():
+                        audio_p.unlink(missing_ok=True)
+                except Exception:
+                    pass
+            self.db.delete(appointment.consultation)
+
+        self.db.delete(appointment)
         self.db.commit()
 

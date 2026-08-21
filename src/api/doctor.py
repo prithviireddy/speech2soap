@@ -418,3 +418,67 @@ def approve_report(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=str(exc),
         )
+
+
+@router.delete(
+    "/appointments/{appointment_id}",
+    status_code=status.HTTP_200_OK,
+)
+def delete_appointment(
+    appointment_id: uuid.UUID,
+    current_user: User = Depends(get_current_doctor),
+    db: Session = Depends(get_db),
+):
+    doctor = current_user.doctor_profile
+    if doctor is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Doctor profile not found.",
+        )
+
+    service = DoctorService(db)
+    try:
+        service.delete_appointment(doctor.id, appointment_id)
+        return {"message": "Appointment deleted successfully."}
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        )
+
+
+@router.delete(
+    "/consultations/{consultation_id}",
+    status_code=status.HTTP_200_OK,
+)
+def delete_consultation(
+    consultation_id: uuid.UUID,
+    current_user: User = Depends(get_current_doctor),
+    db: Session = Depends(get_db),
+):
+    doctor = current_user.doctor_profile
+    if doctor is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Doctor profile not found.",
+        )
+
+    service = DoctorService(db)
+    try:
+        service.delete_consultation(doctor.id, consultation_id)
+        return {"message": "Consultation deleted successfully."}
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(exc),
+        )
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
+        )

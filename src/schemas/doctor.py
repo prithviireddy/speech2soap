@@ -133,6 +133,8 @@ class DoctorReportRead(TimestampSchema):
     id: UUID
     consultation_id: UUID
     patient_id: UUID
+    patient_name: str | None = None
+    patient_number: str | None = None
     is_approved: bool
     report_json: dict
 
