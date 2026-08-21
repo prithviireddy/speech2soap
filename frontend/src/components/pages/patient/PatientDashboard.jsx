@@ -29,8 +29,6 @@ export const PatientDashboard = () => {
           getPatientReports(),
         ]);
 
-        console.log("Patient reports:", reports);
-
         setPatient(patientData);
         setReports(reportsData);
       } catch (err) {

@@ -177,3 +177,55 @@ export const approveDoctorReportAPI = async (
 
     return response.data;
 };
+
+export const getDoctorPatientHistoryAPI = async (patientId) => {
+  const response = await api.get(
+    `/doctor/patients/${patientId}/history`
+  );
+  return response.data;
+};
+
+export const getConsultationTranscriptAPI = async (consultationId) => {
+  const response = await api.get(
+    `/doctor/consultations/${consultationId}/transcript`
+  );
+  return response.data;
+};
+
+// ── RAG Chat Session API ──────────────────────────────────────────────────────
+
+export const listRagSessionsAPI = async (patientId) => {
+  const response = await api.get(`/doctor/patients/${patientId}/ai/sessions`);
+  return response.data;
+};
+
+export const createRagSessionAPI = async (patientId) => {
+  const response = await api.post(`/doctor/patients/${patientId}/ai/sessions`);
+  return response.data;
+};
+
+export const getRagSessionAPI = async (patientId, sessionId) => {
+  const response = await api.get(
+    `/doctor/patients/${patientId}/ai/sessions/${sessionId}`
+  );
+  return response.data;
+};
+
+export const deleteRagSessionAPI = async (patientId, sessionId) => {
+  await api.delete(`/doctor/patients/${patientId}/ai/sessions/${sessionId}`);
+};
+
+export const askInSessionAPI = async (patientId, sessionId, question) => {
+  const response = await api.post(
+    `/doctor/patients/${patientId}/ai/sessions/${sessionId}/ask`,
+    { question }
+  );
+  return response.data;
+};
+
+export const reindexPatientRAGAPI = async (patientId) => {
+  const response = await api.post(
+    `/doctor/patients/${patientId}/ai/reindex`
+  );
+  return response.data;
+};

@@ -85,18 +85,19 @@ export const DoctorAppointmentDetails = () => {
             Patient Information
           </h2>
 
-          <div className="flex items-center gap-3">
-            <User size={20} />
-
-            <div>
-              <p className="text-sm text-text-secondary">
-                Patient Name
-              </p>
-
-              <p className="font-semibold text-lg">
-                {appointment.patient_name}
-              </p>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <User size={20} />
+              <div>
+                <p className="text-sm text-text-secondary">Patient Name</p>
+                <p className="font-semibold text-lg">{appointment.patient_name}</p>
+              </div>
             </div>
+            <Link to={`/doctor/patients/${appointment.patient_id}/history`}>
+              <Button variant="secondary" className="text-sm gap-1">
+                View Patient History →
+              </Button>
+            </Link>
           </div>
         </Card>
 

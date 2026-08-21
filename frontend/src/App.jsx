@@ -19,7 +19,7 @@ import { useAuth } from "./context/AuthContext";
 import { LoginPage } from "./components";
 
 // Doctor Pages
-import { DoctorDashboard,ConsultationUploadPage, DoctorReportReview, DoctorAIAssistant, DoctorAppointments, DoctorAppointmentDetails, ConsultationDetails, DoctorConsultations, DoctorReports} from "./components";
+import { DoctorDashboard, ConsultationUploadPage, DoctorReportReview, DoctorAIAssistant, DoctorAppointments, DoctorAppointmentDetails, ConsultationDetails, DoctorConsultations, DoctorReports, DoctorPatientHistory } from "./components";
 
 // Patient Pages
 import { PatientDashboard, PatientReportViewer, PatientMedications, PatientFollowups, PatientAIAssistant, PatientSettings } from "./components";
@@ -146,8 +146,17 @@ const App = () => {
               <DoctorAIAssistant />
             </ProtectedRoute>
           }
-        /> 
-        
+        />
+
+        <Route
+          path="/doctor/patients/:patientId/history"
+          element={
+            <ProtectedRoute allowedRoles={["DOCTOR"]}>
+              <DoctorPatientHistory />
+            </ProtectedRoute>
+          }
+        />
+
         
 
         {/*PATIENT ROUTES*/}
