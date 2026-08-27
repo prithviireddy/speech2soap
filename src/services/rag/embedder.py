@@ -7,7 +7,7 @@ Key fix: embed_content treats a list of strings as a single multi-part
 document (multi-turn), NOT as separate documents. Each text must be
 embedded individually to get one vector per document.
 """
-
+  
 import os
 from dotenv import load_dotenv
 from google import genai

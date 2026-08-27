@@ -17,13 +17,13 @@ from chromadb.config import Settings
 
 from src.services.rag.embedder import embed_texts, embed_query
 
-# ── Persist path ──────────────────────────────────────────────────────────────
+#  Persist path 
 
 _BASE_DIR = Path(__file__).resolve().parent.parent.parent.parent  # project root
 _CHROMA_PATH = _BASE_DIR / "data" / "chroma_db"
 _CHROMA_PATH.mkdir(parents=True, exist_ok=True)
 
-# ── Client (module-level singleton) ───────────────────────────────────────────
+#  Client (module-level singleton) 
 
 _chroma_client: chromadb.ClientAPI | None = None
 
@@ -43,7 +43,7 @@ def _collection_name(patient_id: str) -> str:
     return f"patient_{str(patient_id).replace('-', '_')}"
 
 
-# ── Public API ────────────────────────────────────────────────────────────────
+#  Public API 
 
 def patient_collection_exists(patient_id: str) -> bool:
     """Check whether a ChromaDB collection for this patient already exists."""

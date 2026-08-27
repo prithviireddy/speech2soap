@@ -16,7 +16,7 @@ import json
 from pathlib import Path
 
 
-# ── Helpers ──────────────────────────────────────────────────────────────────
+# ── Helpers 
 
 def _fmt_date(dt) -> str:
     if dt is None:
@@ -108,7 +108,7 @@ def _build_report_docs(consultation) -> list[dict]:
     return docs
 
 
-# ── Transcript documents ──────────────────────────────────────────────────────
+#  Transcript documents 
 
 def _build_transcript_docs(consultation) -> list[dict]:
     """
@@ -178,7 +178,7 @@ def _build_transcript_docs(consultation) -> list[dict]:
     return docs
 
 
-# ── Medication documents ──────────────────────────────────────────────────────
+#  Medication documents 
 
 def _build_medication_docs(patient) -> list[dict]:
     docs = []
@@ -224,7 +224,7 @@ def _build_followup_docs(patient) -> list[dict]:
     return docs
 
 
-# ── Consultation meta documents ───────────────────────────────────────────────
+#  Consultation meta documents 
 
 def _build_consultation_meta_docs(consultation) -> list[dict]:
     parts = []
@@ -253,7 +253,7 @@ def _build_consultation_meta_docs(consultation) -> list[dict]:
     }]
 
 
-# ── Public API ────────────────────────────────────────────────────────────────
+#  Public API 
 
 def build_patient_documents(patient) -> list[dict]:
     """
